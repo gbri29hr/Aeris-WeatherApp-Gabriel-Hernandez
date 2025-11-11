@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">Aeris</string>
+
+    <string name="inicio_entrar">Entrar</string>
+    <string name="inicio_descripcion_icono">Icono de la aplicación del tiempo</string>
+
+    <string name="main_pronostico_horario">PRONOSTICO HORARIO</string>
+    <string name="main_pronostico_diario">PRONOSTICO</string>
+    <string name="main_humedad">HUMEDAD</string>
+    <string name="main_viento">VIENTO</string>
+    <string name="main_indice_uv">INDICE UV</string>
+    <string name="main_precipitacion">PRECIPITACIÓN</string>
+    <string name="main_alto">Alto</string>
+    <string name="main_medio">Medio</string>
+    <string name="main_bajo">Bajo</string>
+    <string name="main_seleccionar_ciudad">Seleccionar ciudad</string>
+    <string name="main_seleccionar_ciudad_titulo">Selecciona una ciudad</string>
+    <string name="ver_mas_detalles">Ver más detalles</string>
+
+    <string name="ubicaciones_titulo">Ubicaciones</string>
+    <string name="ubicaciones_anadir">Añadir nueva ubicación</string>
+    <string name="ubicaciones_eliminar">Eliminar</string>
+    <string name="ubicaciones_dialogo_eliminar_titulo">Confirmar</string>
+    <string name="ubicaciones_dialogo_eliminar_mensaje">¿Seguro que quieres eliminar esta ubicación?</string>
+    <string name="ubicaciones_buscar_ciudad">Buscar una ciudad</string>
+    <string name="ubicaciones_gestionar">Gestionar Ubicaciones</string>
+    <string name="ubicaciones_usar_actual">Usar mi ubicación actual</string>
+
+    <string name="ajustes_titulo">Ajustes</string>
+    <string name="ajustes_unidades">Unidades</string>
+    <string name="ajustes_temperatura">Temperatura</string>
+    <string name="ajustes_velocidad_viento">Velocidad del Viento</string>
+    <string name="ajustes_escoge_opcion">Escoge una opcion:</string>
+    <string name="ajustes_tema_app">Tema de la App</string>
+    <string name="ajustes_modo_oscuro">Modo oscuro</string>
+    <string name="ajustes_tema_light">Light</string>
+    <string name="ajustes_tema_dark">Dark</string>
+
+    <string name="acerca_de_titulo">Acerca de</string>
+    <string name="acerca_de_texto">
+        Esta aplicación ha sido creada como proyecto.\n\n
+        Versión: 1.0\n
+        Desarrollada por: Gabriel Hernández Rodríguez\n\n
+        Todos los datos meteorológicos son datos de prueba
+        almacenados localmente en una base de datos SQLite con Room.
+    </string>
+
+    <string name="menu_ajustes">Ajustes</string>
+    <string name="menu_ubicaciones">Ubicaciones</string>
+    <string name="menu_eliminar_descripcion">Menú para eliminar ubicación</string>
+
+    <string name="tab_inicio">Inicio</string>
+    
+    <!-- Weather descriptions (6 types matching icons) -->
+    <string name="clima_soleado">Soleado</string>
+    <string name="clima_parcialmente_nublado">Parcialmente nublado</string>
+    <string name="clima_nublado">Nublado</string>
+    <string name="clima_lluvioso">Lluvioso</string>
+    <string name="clima_tormenta">Tormenta</string>
+    <string name="clima_nieve">Nieve</string>
+    
+    <!-- Dialogs and messages -->
+    <string name="ubicaciones_seleccionar_titulo">Seleccionar ubicación</string>
+    <string name="ubicaciones_ya_visible">ya está visible</string>
+    <string name="ubicaciones_cargando">Cargando ciudades…</string>
+    <string name="ubicaciones_anadir_titulo">Añadir ubicación</string>
+    <string name="ubicaciones_anadir_mensaje">¿Deseas añadir %s a tu lista de ubicaciones?</string>
+    <string name="ubicaciones_anadir_btn">Añadir</string>
+    <string name="ubicaciones_ciudad_anadida">%s añadida</string>
+    <string name="ubicaciones_no_puede_eliminar_principal">No puedes eliminar la ubicación principal</string>
+    <string name="ubicaciones_ciudad_eliminada">%s eliminada</string>
+    <string name="ubicaciones_seleccionar_para_eliminar">Selecciona ciudades para eliminar</string>
+    <string name="ubicaciones_no_seleccionadas">No hay ciudades seleccionadas</string>
+    <string name="ubicaciones_eliminar_multiple_mensaje">¿Eliminar %d ciudad(es) seleccionada(s)?</string>
+    <string name="ubicaciones_multiples_eliminadas">%d ciudad(es) eliminada(s)</string>
+    <string name="ubicaciones_no_eliminar_principal_deseleccionar">No puedes eliminar la ubicación principal. Deselecciónala primero.</string>
+    <string name="btn_cancelar">Cancelar</string>
+
+</resources>

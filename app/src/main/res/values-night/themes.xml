@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TEMA OSCURO -->
+    <style name="Aeris.Theme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primario_oscuro</item>
+        <item name="colorOnPrimary">@color/sobre_primario_oscuro</item>
+        <item name="colorPrimaryContainer">@color/contenedor_primario_oscuro</item>
+        <item name="colorOnPrimaryContainer">@color/sobre_contenedor_primario_oscuro</item>
+        <item name="android:colorBackground">@color/fondo_oscuro</item>
+        <item name="colorOnBackground">@color/sobre_fondo_oscuro</item>
+        <item name="colorSurface">@color/superficie_oscuro</item>
+        <item name="colorOnSurface">@color/sobre_superficie_oscuro</item>
+        <item name="colorOnSurfaceVariant">@color/texto_variante_oscuro</item>
+        <item name="colorSurfaceContainerLowest">@color/fondo_oscuro</item>
+        <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigationView</item>
+    </style>
+    
+    <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
+        <item name="itemActiveIndicatorStyle">@null</item>
+    </style>
+    
+    <style name="ThemeOverlay.App.BottomNavigationView" parent="">
+        <item name="colorOnSurfaceVariant">@color/texto_variante_oscuro</item>
+        <item name="colorOnSecondaryContainer">@color/primario_oscuro</item>
+    </style>
+</resources>

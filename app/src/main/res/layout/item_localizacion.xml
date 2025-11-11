@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="12dp">
+
+    <!-- MAX/MIN fuera de la card (solo visible para ciudad principal) -->
+    <LinearLayout
+        android:id="@+id/item_max_min_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_marginBottom="4dp"
+        tools:visibility="visible">
+        
+        <TextView
+            android:id="@+id/item_min_temp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:gravity="start"
+            tools:text="MIN: 10°" />
+            
+        <TextView
+            android:id="@+id/item_max_temp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceLabelLarge"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:gravity="end"
+            tools:text="MAX: 30°" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        style="?attr/materialCardViewOutlinedStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:strokeColor="?attr/colorPrimary"
+        app:strokeWidth="1dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- Checkbox para modo eliminación (oculto por defecto) -->
+            <CheckBox
+                android:id="@+id/item_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:visibility="visible" />
+
+            <!-- Ciudad y día en la parte superior -->
+            <TextView
+                android:id="@+id/item_city_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:textColor="?attr/colorOnSurface"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintStart_toEndOf="@+id/item_checkbox"
+                app:layout_constraintEnd_toStartOf="@+id/item_day"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="8dp"
+                tools:text="Ciudad Real" />
+
+            <TextView
+                android:id="@+id/item_day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBaseline_toBaselineOf="@+id/item_city_name"
+                tools:text="Sunday" />
+
+            <!-- Icono y descripción del clima -->
+            <ImageView
+                android:id="@+id/item_weather_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="8dp"
+                app:tint="?attr/colorOnSurface"
+                app:layout_constraintStart_toEndOf="@+id/item_checkbox"
+                app:layout_constraintTop_toBottomOf="@+id/item_city_name"
+                tools:src="@drawable/ic_sol" />
+
+            <TextView
+                android:id="@+id/item_weather_description"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintStart_toEndOf="@+id/item_weather_icon"
+                app:layout_constraintEnd_toStartOf="@+id/item_temperature"
+                app:layout_constraintTop_toTopOf="@+id/item_weather_icon"
+                app:layout_constraintBottom_toBottomOf="@+id/item_weather_icon"
+                tools:text="Very Sunny" />
+
+            <!-- Temperatura -->
+            <TextView
+                android:id="@+id/item_temperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceDisplayMedium"
+                android:textColor="?attr/colorOnSurface"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/item_weather_icon"
+                app:layout_constraintBottom_toBottomOf="@+id/item_weather_icon"
+                tools:text="28°" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

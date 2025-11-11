@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">Aeris</string>
+
+    <string name="inicio_entrar">Enter</string>
+    <string name="inicio_descripcion_icono">Weather application icon</string>
+
+    <string name="main_pronostico_horario">HOURLY FORECAST</string>
+    <string name="main_pronostico_diario">FORECAST</string>
+    <string name="main_humedad">HUMIDITY</string>
+    <string name="main_viento">WIND</string>
+    <string name="main_indice_uv">UV INDEX</string>
+    <string name="main_precipitacion">PRECIPITATION</string>
+    <string name="main_alto">High</string>
+    <string name="main_medio">Medium</string>
+    <string name="main_bajo">Low</string>
+    <string name="main_seleccionar_ciudad">Select city</string>
+    <string name="main_seleccionar_ciudad_titulo">Select a city</string>
+    <string name="ver_mas_detalles">See more details</string>
+
+    <string name="ubicaciones_titulo">Locations</string>
+    <string name="ubicaciones_anadir">Add new location</string>
+    <string name="ubicaciones_eliminar">Delete</string>
+    <string name="ubicaciones_dialogo_eliminar_titulo">Confirm</string>
+    <string name="ubicaciones_dialogo_eliminar_mensaje">Are you sure you want to delete this location?</string>
+    <string name="ubicaciones_buscar_ciudad">Search for a city</string>
+    <string name="ubicaciones_gestionar">Manage Locations</string>
+    <string name="ubicaciones_usar_actual">Use my current location</string>
+
+    <string name="ajustes_titulo">Settings</string>
+    <string name="ajustes_unidades">Units</string>
+    <string name="ajustes_temperatura">Temperature</string>
+    <string name="ajustes_velocidad_viento">Wind Speed</string>
+    <string name="ajustes_escoge_opcion">Choose an option:</string>
+    <string name="ajustes_tema_app">App Theme</string>
+    <string name="ajustes_modo_oscuro">Dark mode</string>
+    <string name="ajustes_tema_light">Light</string>
+    <string name="ajustes_tema_dark">Dark</string>
+
+    <string name="acerca_de_titulo">About</string>
+    <string name="acerca_de_texto">
+        This application was created as a project.\n\n
+        Version: 1.0\n
+        Developed by: Gabriel Hernández Rodríguez\n\n
+        All weather data is test data
+        stored locally in a SQLite database using Room.
+    </string>
+
+    <string name="menu_ajustes">Settings</string>
+    <string name="menu_ubicaciones">Locations</string>
+    <string name="menu_eliminar_descripcion">Menu to delete location</string>
+
+    <string name="tab_inicio">Home</string>
+    
+    <!-- Weather descriptions (6 types matching icons) -->
+    <string name="clima_soleado">Sunny</string>
+    <string name="clima_parcialmente_nublado">Partly Cloudy</string>
+    <string name="clima_nublado">Cloudy</string>
+    <string name="clima_lluvioso">Rainy</string>
+    <string name="clima_tormenta">Stormy</string>
+    <string name="clima_nieve">Snowy</string>
+    
+    <!-- Dialogs and messages -->
+    <string name="ubicaciones_seleccionar_titulo">Select location</string>
+    <string name="ubicaciones_ya_visible">is already visible</string>
+    <string name="ubicaciones_cargando">Loading cities…</string>
+    <string name="ubicaciones_anadir_titulo">Add location</string>
+    <string name="ubicaciones_anadir_mensaje">Do you want to add %s to your locations list?</string>
+    <string name="ubicaciones_anadir_btn">Add</string>
+    <string name="ubicaciones_ciudad_anadida">%s added</string>
+    <string name="ubicaciones_no_puede_eliminar_principal">You cannot delete the main location</string>
+    <string name="ubicaciones_ciudad_eliminada">%s deleted</string>
+    <string name="ubicaciones_seleccionar_para_eliminar">Select cities to delete</string>
+    <string name="ubicaciones_no_seleccionadas">No cities selected</string>
+    <string name="ubicaciones_eliminar_multiple_mensaje">Delete %d selected city(ies)?</string>
+    <string name="ubicaciones_multiples_eliminadas">%d city(ies) deleted</string>
+    <string name="ubicaciones_no_eliminar_principal_deseleccionar">You cannot delete the main location. Deselect it first.</string>
+    <string name="btn_cancelar">Cancel</string>
+
+</resources>

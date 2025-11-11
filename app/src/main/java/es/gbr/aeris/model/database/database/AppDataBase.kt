@@ -1,0 +1,296 @@
+package es.gbr.aeris.model.database.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import es.gbr.aeris.model.database.dao.WeatherDao
+import es.gbr.aeris.model.database.entities.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.math.sin
+
+@Database(
+    entities = [
+        CiudadEntidad::class,
+        TiempoActualEntidad::class,
+        PrediccionHorasEntidad::class,
+        PrediccionDiariaEntidad::class
+    ],
+    version = 6,
+    exportSchema = false
+)
+abstract class AppDataBase : RoomDatabase() {
+
+    abstract fun weatherDao(): WeatherDao
+
+    // Patrón Singleton
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDataBase? = null
+
+        fun obtenerBaseDeDatos(context: Context): AppDataBase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDataBase::class.java,
+                    "weather_app.db"
+                )
+                    .fallbackToDestructiveMigration()
+                    .addCallback(DatabaseCallback())
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+
+
+    private class DatabaseCallback : Callback() {
+
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+            INSTANCE?.let { database ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    populateDatabase(database.weatherDao())
+                }
+            }
+        }
+        
+        private fun generarPrediccion24Horas(cityId: Int, tempBase: Double, iconoBase: String): List<PrediccionHorasEntidad> {
+            val horas = mutableListOf<PrediccionHorasEntidad>()
+            for (h in 0..23) {
+                // Variación de temperatura durante el día
+                val variacion = sin((h - 6) * Math.PI / 12) * 5
+                horas.add(PrediccionHorasEntidad(
+                    idCiudadFk = cityId,
+                    hora = String.format("%02d:00", h),
+                    temperatura = tempBase + variacion,
+                    codigoIcono = iconoBase
+                ))
+            }
+            return horas
+        }
+        
+        private fun generarPrediccion7Dias(cityId: Int, tempAlta: Double, tempBaja: Double, iconoBase: String): List<PrediccionDiariaEntidad> {
+            val dias = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+            // Usar variedad de iconos que existen como PNG
+            val iconos = listOf("ic_sol", "ic_parcialmente_nublado", "ic_nublado", "ic_sol", "ic_parcialmente_nublado", "ic_sol", "ic_lluvia")
+            return dias.mapIndexed { index, dia ->
+                PrediccionDiariaEntidad(
+                    idCiudadFk = cityId,
+                    nombreDia = dia,
+                    tempAlta = tempAlta + (index - 3) * 0.5,
+                    tempBaja = tempBaja + (index - 3) * 0.3,
+                    codigoIcono = iconos[index]
+                )
+            }
+        }
+
+        suspend fun populateDatabase(weatherDao: WeatherDao) {
+
+            // --- 1. CIUDAD REAL ---
+            var cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Ciudad Real", latitud = 38.9863, longitud = -3.9271))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 28.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 30.0, tempBaja = 14.0,
+                humedad = 25.0, vientoVelocidad = 5.0, uvIndice = 8.0, precipitacion = 5
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 28.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 30.0, 14.0, "ic_sol"))
+
+            // --- 2. MADRID ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Madrid", latitud = 40.4167, longitud = -3.7038))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 25.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 28.0, tempBaja = 15.0,
+                humedad = 30.0, vientoVelocidad = 10.0, uvIndice = 7.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 25.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 28.0, 15.0, "ic_sol"))
+
+            // --- 3. BARCELONA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Barcelona", latitud = 41.3888, longitud = 2.159))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 22.0, descripcion = "Parcialmente nublado",
+                codigoIcono = "ic_parcialmente_nublado", tempAlta = 24.0, tempBaja = 18.0,
+                humedad = 60.0, vientoVelocidad = 15.0, uvIndice = 5.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 22.0, "ic_parcialmente_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 24.0, 18.0, "ic_parcialmente_nublado"))
+
+            // --- 4. VALENCIA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Valencia", latitud = 39.4699, longitud = -0.3763))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 26.0, descripcion = "Nublado",
+                codigoIcono = "ic_nublado", tempAlta = 29.0, tempBaja = 20.0,
+                humedad = 55.0, vientoVelocidad = 12.0, uvIndice = 6.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 26.0, "ic_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 29.0, 20.0, "ic_nublado"))
+
+            // --- 5. SEVILLA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Sevilla", latitud = 37.3891, longitud = -5.9845))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 31.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 34.0, tempBaja = 19.0,
+                humedad = 20.0, vientoVelocidad = 8.0, uvIndice = 9.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 31.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 34.0, 19.0, "ic_sol"))
+
+            // --- 6. ZARAGOZA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Zaragoza", latitud = 41.6488, longitud = -0.8891))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 24.0, descripcion = "Parcialmente nublado",
+                codigoIcono = "ic_parcialmente_nublado", tempAlta = 27.0, tempBaja = 14.0,
+                humedad = 35.0, vientoVelocidad = 25.0, uvIndice = 7.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 24.0, "ic_parcialmente_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 27.0, 14.0, "ic_parcialmente_nublado"))
+
+            // --- 7. MÁLAGA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Málaga", latitud = 36.7213, longitud = -4.4214))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 27.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 29.0, tempBaja = 21.0,
+                humedad = 50.0, vientoVelocidad = 10.0, uvIndice = 8.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 27.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 29.0, 21.0, "ic_sol"))
+
+            // --- 8. MURCIA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Murcia", latitud = 37.9922, longitud = -1.1307))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 29.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 32.0, tempBaja = 18.0,
+                humedad = 30.0, vientoVelocidad = 7.0, uvIndice = 9.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 29.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 32.0, 18.0, "ic_sol"))
+
+            // --- 9. PALMA DE MALLORCA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Palma", latitud = 39.5696, longitud = 2.6502))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 25.0, descripcion = "Parcialmente nublado",
+                codigoIcono = "ic_parcialmente_nublado", tempAlta = 27.0, tempBaja = 20.0,
+                humedad = 65.0, vientoVelocidad = 14.0, uvIndice = 6.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 25.0, "ic_parcialmente_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 27.0, 20.0, "ic_parcialmente_nublado"))
+
+            // --- 10. LAS PALMAS DE GRAN CANARIA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Las Palmas", latitud = 28.1248, longitud = -15.43))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 23.0, descripcion = "Parcialmente nublado",
+                codigoIcono = "ic_parcialmente_nublado", tempAlta = 25.0, tempBaja = 19.0,
+                humedad = 70.0, vientoVelocidad = 18.0, uvIndice = 7.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 23.0, "ic_parcialmente_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 25.0, 19.0, "ic_parcialmente_nublado"))
+
+            // --- 11. BILBAO ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Bilbao", latitud = 43.2630, longitud = -2.9350))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 18.0, descripcion = "Lluvioso",
+                codigoIcono = "ic_lluvia", tempAlta = 20.0, tempBaja = 14.0,
+                humedad = 80.0, vientoVelocidad = 10.0, uvIndice = 3.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 18.0, "ic_lluvia"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 20.0, 14.0, "ic_lluvia"))
+
+            // --- 12. ALICANTE ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Alicante", latitud = 38.3452, longitud = -0.4810))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 26.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 28.0, tempBaja = 20.0,
+                humedad = 58.0, vientoVelocidad = 11.0, uvIndice = 7.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 26.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 28.0, 20.0, "ic_sol"))
+
+            // --- 13. CÓRDOBA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Córdoba", latitud = 37.8882, longitud = -4.7794))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 30.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 33.0, tempBaja = 18.0,
+                humedad = 22.0, vientoVelocidad = 9.0, uvIndice = 9.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 30.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 33.0, 18.0, "ic_sol"))
+
+            // --- 14. VALLADOLID ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Valladolid", latitud = 41.6521, longitud = -4.7286))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 23.0, descripcion = "Parcialmente nublado",
+                codigoIcono = "ic_parcialmente_nublado", tempAlta = 26.0, tempBaja = 12.0,
+                humedad = 40.0, vientoVelocidad = 13.0, uvIndice = 6.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 23.0, "ic_parcialmente_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 26.0, 12.0, "ic_parcialmente_nublado"))
+
+            // --- 15. VIGO ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Vigo", latitud = 42.2406, longitud = -8.7207))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 19.0, descripcion = "Nublado",
+                codigoIcono = "ic_nublado", tempAlta = 21.0, tempBaja = 15.0,
+                humedad = 75.0, vientoVelocidad = 10.0, uvIndice = 4.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 19.0, "ic_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 21.0, 15.0, "ic_nublado"))
+
+            // --- 16. GRANADA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Granada", latitud = 37.1773, longitud = -3.5986))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 28.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 31.0, tempBaja = 16.0,
+                humedad = 28.0, vientoVelocidad = 6.0, uvIndice = 8.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 28.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 31.0, 16.0, "ic_sol"))
+
+            // --- 17. VITORIA-GASTEIZ ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Vitoria-Gasteiz", latitud = 42.8467, longitud = -2.6731))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 20.0, descripcion = "Parcialmente nublado",
+                codigoIcono = "ic_parcialmente_nublado", tempAlta = 23.0, tempBaja = 11.0,
+                humedad = 60.0, vientoVelocidad = 12.0, uvIndice = 5.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 20.0, "ic_parcialmente_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 23.0, 11.0, "ic_parcialmente_nublado"))
+
+            // --- 18. GIJÓN ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Gijón", latitud = 43.5322, longitud = -5.6611))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 17.0, descripcion = "Lluvioso",
+                codigoIcono = "ic_lluvia", tempAlta = 19.0, tempBaja = 14.0,
+                humedad = 82.0, vientoVelocidad = 15.0, uvIndice = 3.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 17.0, "ic_lluvia"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 19.0, 14.0, "ic_lluvia"))
+
+            // --- 19. SANTANDER ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Santander", latitud = 43.4623, longitud = -3.8099))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 18.0, descripcion = "Nublado",
+                codigoIcono = "ic_nublado", tempAlta = 20.0, tempBaja = 15.0,
+                humedad = 78.0, vientoVelocidad = 12.0, uvIndice = 4.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 18.0, "ic_nublado"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 20.0, 15.0, "ic_nublado"))
+
+            // --- 20. PAMPLONA ---
+            cityId = weatherDao.insertarCiudad(CiudadEntidad(nombre = "Pamplona", latitud = 42.8125, longitud = -1.6458))
+            weatherDao.insertarTiempoActual(TiempoActualEntidad(
+                idCiudadFk = cityId.toInt(), temperatura = 21.0, descripcion = "Soleado",
+                codigoIcono = "ic_sol", tempAlta = 24.0, tempBaja = 13.0,
+                humedad = 45.0, vientoVelocidad = 11.0, uvIndice = 6.0, precipitacion = 10
+            ))
+            weatherDao.insertarListaHoras(generarPrediccion24Horas(cityId.toInt(), 21.0, "ic_sol"))
+            weatherDao.insertarListaDias(generarPrediccion7Dias(cityId.toInt(), 24.0, 13.0, "ic_sol"))
+
+        }
+    }
+}
