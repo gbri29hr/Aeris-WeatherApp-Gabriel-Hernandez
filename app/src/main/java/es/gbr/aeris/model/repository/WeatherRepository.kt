@@ -10,9 +10,7 @@ import es.gbr.aeris.model.database.relations.CiudadConTiempoActual
  * Implementa el patrón Repository del patrón arquitectónico MVVM.
  *
  * Encapsula la lógica de acceso a datos y proporciona una API limpia al ViewModel.
- * Todos los métodos retornan LiveData para permitir observación reactiva de cambios.
  *
- * @property weatherDao DAO para acceso a la base de datos Room
  */
 class WeatherRepository(private val weatherDao: WeatherDao) {
 
@@ -62,7 +60,6 @@ class WeatherRepository(private val weatherDao: WeatherDao) {
 
     /**
      * Inserta una nueva ciudad en la base de datos.
-     * Función suspendida para ejecución asíncrona con corrutinas.
      * @param ciudad Entidad de ciudad a insertar
      * @return ID de la ciudad insertada
      */

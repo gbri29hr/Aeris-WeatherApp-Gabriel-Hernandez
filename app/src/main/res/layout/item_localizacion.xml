@@ -10,7 +10,7 @@
     android:layout_marginEnd="16dp"
     android:layout_marginBottom="12dp">
 
-    <!-- MAX/MIN fuera de la card (solo visible para ciudad principal) -->
+    <!-- Temperaturas máxima y mínima -->
     <LinearLayout
         android:id="@+id/item_max_min_container"
         android:layout_width="match_parent"
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- Checkbox para modo eliminación (oculto por defecto) -->
+            <!-- Checkbox para seleccionar ciudad -->
             <CheckBox
                 android:id="@+id/item_checkbox"
                 android:layout_width="wrap_content"
@@ -64,7 +64,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:visibility="visible" />
 
-            <!-- Ciudad y día en la parte superior -->
+            <!-- Nombre de la ciudad -->
             <TextView
                 android:id="@+id/item_city_name"
                 android:layout_width="0dp"
@@ -91,7 +91,7 @@
                 app:layout_constraintBaseline_toBaselineOf="@+id/item_city_name"
                 tools:text="Sunday" />
 
-            <!-- Icono y descripción del clima -->
+            <!-- Icono del clima -->
             <ImageView
                 android:id="@+id/item_weather_icon"
                 android:layout_width="40dp"
@@ -116,7 +116,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/item_weather_icon"
                 tools:text="Very Sunny" />
 
-            <!-- Temperatura -->
+            <!-- Temperatura actual -->
             <TextView
                 android:id="@+id/item_temperature"
                 android:layout_width="wrap_content"

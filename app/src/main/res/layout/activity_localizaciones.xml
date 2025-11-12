@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurfaceContainerLowest"
+    android:background="?android:attr/colorBackground"
     tools:context=".view.activities.LocalizacionesActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -19,7 +19,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:title="@string/ubicaciones_titulo"
         app:titleCentered="true"
-        android:background="?attr/colorSurfaceContainerLowest"
+        android:background="?attr/colorSurface"
         app:titleTextAppearance="?attr/textAppearanceHeadlineMedium" />
 
     <com.google.android.material.textfield.TextInputLayout

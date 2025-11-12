@@ -10,29 +10,18 @@ import es.gbr.aeris.model.database.entities.PrediccionDiariaEntidad
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * Adaptador para el RecyclerView de predicción por días.
- * Muestra la temperatura máxima/mínima, día e icono del clima para cada día de la semana.
- *
- * @param datos Lista de predicciones diarias desde la base de datos
- * @param usarFahrenheit Indica si se deben mostrar las temperaturas en Fahrenheit o Celsius
- */
+// Adaptador para mostrar la predicción del clima por días
 class PrediccionDiasAdapter(
     private var datos: List<PrediccionDiariaEntidad> = emptyList(),
     private var usarFahrenheit: Boolean = false
 ) : RecyclerView.Adapter<PrediccionDiasAdapter.PrediccionDiasViewHolder>() {
 
-    /**
-     * ViewHolder que mantiene las referencias a las vistas de cada item.
-     */
+    // ViewHolder para cada elemento de la lista
     class PrediccionDiasViewHolder(
         val vinculacion: ItemPrediccionDiasBinding
     ) : RecyclerView.ViewHolder(vinculacion.root) {
 
-        /**
-         * Vincula los datos de una predicción diaria con las vistas del item.
-         * Muestra dos líneas: día de la BD (traducido) y día calculado siguiente.
-         */
+        // Muestra los datos de un día con dos líneas de texto
         fun vincular(elemento: PrediccionDiariaEntidad, usarFahrenheit: Boolean, posicion: Int) {
             // Mostrar día traducido según idioma (Lunes/Monday)
             vinculacion.itemDailyDayPrimary.text = DatosCompartidos.traducirDia(
@@ -75,7 +64,6 @@ class PrediccionDiasAdapter(
         }
     }
 
-    /** Crea un nuevo ViewHolder inflando el layout del item */
     override fun onCreateViewHolder(padre: ViewGroup, tipoVista: Int): PrediccionDiasViewHolder {
         val vinculacion = ItemPrediccionDiasBinding.inflate(
             LayoutInflater.from(padre.context),
@@ -85,18 +73,14 @@ class PrediccionDiasAdapter(
         return PrediccionDiasViewHolder(vinculacion)
     }
 
-    /** Vincula los datos de una posición específica con el ViewHolder */
     override fun onBindViewHolder(contenedor: PrediccionDiasViewHolder, posicion: Int) {
         contenedor.vincular(datos[posicion], usarFahrenheit, posicion)
     }
 
-    /** Retorna el número total de items en la lista */
+
     override fun getItemCount(): Int = datos.size
 
-    /**
-     * Actualiza la lista de datos y notifica al RecyclerView para que se redibuje.
-     * Llamado cuando cambian los datos desde el ViewModel.
-     */
+    // Actualiza los datos cuando cambian desde el ViewModel
     fun actualizarDatos(nuevosDatos: List<PrediccionDiariaEntidad>) {
         datos = nuevosDatos
         notifyDataSetChanged()

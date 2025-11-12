@@ -16,11 +16,23 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import es.gbr.aeris.model.DatosCompartidos
 import es.gbr.aeris.viewmodel.LocalizacionesViewModel
 
+/**
+ * Activity que gestiona la lista de ubicaciones/ciudades guardadas.
+ * Permite buscar, añadir y eliminar ciudades de la lista visible.
+ * 
+ * Características:
+ * - Búsqueda en tiempo real de ciudades
+ * - Modo de eliminación múltiple
+ * - Marcar ciudad como principal (ubicación actual)
+ * - Las ciudades se ocultan pero no se borran de la BD
+ */
 class LocalizacionesActivity : AppCompatActivity() {
 
     private lateinit var vinculacion: ActivityLocalizacionesBinding
     private val modeloVista: LocalizacionesViewModel by viewModels()
     private lateinit var adaptadorLocalizacion: LocalizacionAdapter
+    
+    // Preferencias recibidas desde otras activities
     private var usarFahrenheit: Boolean = false
     private var usarMph: Boolean = false
     private var temaOscuro: Boolean = false
@@ -46,17 +58,20 @@ class LocalizacionesActivity : AppCompatActivity() {
         observarDatos()
     }
     
+    // Actualiza la ciudad principal cuando volvemos a esta pantalla
     override fun onResume() {
         super.onResume()
         adaptadorLocalizacion.actualizarCiudadPrincipal(DatosCompartidos.idCiudadSeleccionada)
     }
 
+    // Configurar el botón de añadir ciudad
     private fun configurarBotonAnadir() {
         vinculacion.btnAddLocation.setOnClickListener {
             mostrarDialogoAnadirCiudad()
         }
     }
     
+    // Muestra un diálogo con todas las ciudades disponibles
     private fun mostrarDialogoAnadirCiudad() {
         modeloVista.todasLasCiudadesDB.value?.let { todasLasCiudades ->
             if (todasLasCiudades.isEmpty()) {
@@ -95,6 +110,7 @@ class LocalizacionesActivity : AppCompatActivity() {
         }
     }
     
+    // Confirma antes de añadir una ciudad
     private fun mostrarDialogoConfirmarAnadir(ciudad: CiudadEntidad) {
         AlertDialog.Builder(this)
             .setTitle(R.string.ubicaciones_anadir_titulo)
@@ -111,28 +127,32 @@ class LocalizacionesActivity : AppCompatActivity() {
         return DatosCompartidos.obtenerCiudadesOcultas()
     }
     
+    // Oculta una ciudad de la lista
     private fun ocultarCiudad(idCiudad: Int) {
         DatosCompartidos.ocultarCiudad(idCiudad)
         modeloVista.actualizarCiudadesOcultas(obtenerCiudadesOcultas())
     }
     
+    // Hace visible una ciudad oculta
     private fun mostrarCiudad(idCiudad: Int) {
         DatosCompartidos.mostrarCiudad(idCiudad)
         modeloVista.actualizarCiudadesOcultas(obtenerCiudadesOcultas())
     }
 
+    // Configurar botón de ubicación actual
     private fun configurarBotonUbicacionActual() {
         vinculacion.cardUsarUbicacion.setOnClickListener {
             Toast.makeText(this, "Disponible próximamente", Toast.LENGTH_SHORT).show()
         }
     }
-    
+
+    // Configurar botón de eliminar múltiples ciudades
     private fun configurarBotonEliminar() {
         vinculacion.btnDeleteMode.setOnClickListener {
             adaptadorLocalizacion.activarModoEliminacion()
             Toast.makeText(this, R.string.ubicaciones_seleccionar_para_eliminar, Toast.LENGTH_SHORT).show()
             
-            // Cambiar el botón a "Confirmar"
+            // Cambiar el botón a modo confirmación
             vinculacion.btnDeleteMode.setImageResource(android.R.drawable.ic_menu_delete)
             vinculacion.btnDeleteMode.setOnClickListener {
                 if (adaptadorLocalizacion.haySeleccionadas()) {
@@ -144,12 +164,14 @@ class LocalizacionesActivity : AppCompatActivity() {
         }
     }
     
+    // Cancela el modo de eliminación
     private fun configurarBotonCancelar() {
         adaptadorLocalizacion.desactivarModoEliminacion()
         vinculacion.btnDeleteMode.setImageResource(R.drawable.ic_eliminar)
         configurarBotonEliminar()
     }
 
+    // Configurar la navegación inferior
     private fun configurarNavegacionInferior() {
         vinculacion.bottomNavigation.selectedItemId = R.id.nav_localizaciones
 
@@ -183,6 +205,7 @@ class LocalizacionesActivity : AppCompatActivity() {
         }
     }
 
+    // Configurar el RecyclerView de ciudades
     private fun configurarRecyclerView() {
         adaptadorLocalizacion = LocalizacionAdapter(
             alHacerClicEnElemento = { ciudad ->
@@ -199,35 +222,34 @@ class LocalizacionesActivity : AppCompatActivity() {
         vinculacion.locationsRecycler.adapter = adaptadorLocalizacion
     }
 
+    // Configurar el buscador de ciudades
     private fun configurarBusqueda() {
-        // Usar addTextChangedListener con TextWatcher como en PDF 2.8
         vinculacion.locationsSearchBarEdittext.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 // No se necesita implementación
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // No se necesita implementación
             }
 
             override fun afterTextChanged(s: Editable?) {
-                // Llamar a la búsqueda después de que el texto ha cambiado
                 modeloVista.buscarCiudad(s.toString())
             }
         })
     }
 
+    // Observar cambios en los datos para actualizar la lista
     private fun observarDatos() {
         modeloVista.actualizarCiudadesOcultas(DatosCompartidos.obtenerCiudadesOcultas())
 
-        // Observar cambios en la lista completa de ciudades para actualizar el filtrado
+        // Observar lista completa
         modeloVista.todasLasCiudadesDB.observe(this) { todasLasCiudades ->
             if (todasLasCiudades != null) {
                 modeloVista.actualizarListaFiltrada(todasLasCiudades)
             }
         }
 
-        // Observar cambios en las ciudades filtradas para actualizar el adaptador
+        // Observar lista filtrada
         modeloVista.ciudadesFiltradas.observe(this) { listaCiudades ->
             if (listaCiudades != null) {
                 adaptadorLocalizacion.actualizarDatos(listaCiudades)
@@ -238,8 +260,13 @@ class LocalizacionesActivity : AppCompatActivity() {
     }
 
     private fun seleccionarCiudad(ciudad: CiudadEntidad) {
+
     }
 
+    /**
+     * Muestra diálogo de confirmación para ocultar una sola ciudad.
+     * No permite eliminar la ciudad marcada como principal.
+     */
     private fun mostrarDialogoEliminar(ciudad: CiudadEntidad) {
         val idCiudadPrincipal = DatosCompartidos.idCiudadSeleccionada
 
@@ -259,8 +286,11 @@ class LocalizacionesActivity : AppCompatActivity() {
             .show()
     }
     
+    /**
+     * Muestra diálogo de confirmación para ocultar múltiples ciudades seleccionadas.
+     * Verifica que la ciudad principal no esté en la selección.
+     */
     private fun mostrarDialogoEliminarMultiple() {
-        // Obtener ID de la ciudad principal
         val idCiudadPrincipal = DatosCompartidos.idCiudadSeleccionada
 
         val idsAEliminar = adaptadorLocalizacion.obtenerCiudadesSeleccionadas()

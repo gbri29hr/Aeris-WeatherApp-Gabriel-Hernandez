@@ -10,7 +10,7 @@
     android:paddingTop="12dp"
     android:paddingBottom="12dp">
 
-    <!-- Lado Izquierdo: Nombres de los días -->
+    <!-- Nombre del día -->
     <TextView
         android:id="@+id/item_daily_day_primary"
         android:layout_width="wrap_content"
@@ -35,7 +35,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="Martes" />
 
-    <!-- Lado Derecho: Icono y Temperaturas -->
+    <!-- Icono del clima y temperaturas -->
     <TextView
         android:id="@+id/item_daily_temp"
         android:layout_width="wrap_content"

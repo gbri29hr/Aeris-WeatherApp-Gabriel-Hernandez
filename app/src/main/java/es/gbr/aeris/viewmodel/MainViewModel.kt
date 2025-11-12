@@ -24,17 +24,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: WeatherRepository
 
-    /** Lista completa de ciudades disponibles en la base de datos */
+    // Lista de todas las ciudades
     val todasLasCiudades: LiveData<List<CiudadEntidad>>
 
-    /** ID de la ciudad actualmente seleccionada */
+    // ID de la ciudad seleccionada
     private val _idCiudadSeleccionada = MutableLiveData<Int>()
-
-    /** ID de la ciudad seleccionada */
     val idCiudadSeleccionada: LiveData<Int> = _idCiudadSeleccionada
 
     init {
-        // Inicializar base de datos y repositorio
         val weatherDao = AppDataBase.obtenerBaseDeDatos(application).weatherDao()
         repository = WeatherRepository(weatherDao)
         todasLasCiudades = repository.obtenerTodasLasCiudades()

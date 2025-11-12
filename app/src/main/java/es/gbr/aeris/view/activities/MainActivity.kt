@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Configura los RecyclerViews para mostrar pronósticos horarios y diarios.
-     * Utiliza LayoutManagers horizontal y vertical respectivamente.
+     * Utiliza LayoutManagers horizontal y vertical.
      */
     private fun configurarRecyclerViews() {
         adaptadorHoras = PrediccionHorasAdapter(usarFahrenheit = usarFahrenheit)
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Observa cambios en los datos del ViewModel mediante LiveData.
-     * Actualiza la UI automáticamente cuando los datos cambian.
+     * Actualiza automáticamente cuando los datos cambian.
      */
     private fun observarDatos() {
         modeloVista.tiempoActual.observe(this) { tiempo ->
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             adaptadorDias.actualizarDatos(listaDias)
         }
 
-        // Observar el ID seleccionado para actualizar el nombre de la ciudad
+
         modeloVista.idCiudadSeleccionada.observe(this) { idSeleccionado ->
             modeloVista.todasLasCiudades.value?.let { ciudades ->
                 val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // También observar cuando la lista de ciudades cambia
+
         modeloVista.todasLasCiudades.observe(this) { ciudades ->
             modeloVista.idCiudadSeleccionada.value?.let { idSeleccionado ->
                 val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
@@ -211,16 +211,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Convierte temperatura de Celsius a Fahrenheit */
+    // Convierte Celsius a Fahrenheit
     private fun celsiusAFahrenheit(celsius: Double): Double = (celsius * 9/5) + 32
 
-    /** Convierte velocidad de kilómetros por hora a millas por hora */
+    // Convierte km/h a mph
     private fun kphAMph(kph: Double): Double = kph / 1.609
 
-    /**
-     * Configura el botón para seleccionar ciudad.
-     * Muestra un diálogo con la lista de ciudades disponibles.
-     */
+    // Configurar botón de selección de ciudad
     private fun configurarBotonSeleccionCiudad() {
         vinculacion.mainButtonSelectCity.setOnClickListener {
             mostrarDialogoSeleccionCiudad()

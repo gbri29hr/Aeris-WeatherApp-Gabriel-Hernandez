@@ -10,6 +10,16 @@ import androidx.core.content.ContextCompat
 import es.gbr.aeris.R
 import es.gbr.aeris.databinding.ActivityAjustesBinding
 
+/**
+ * Activity que permite configurar las preferencias de la aplicación.
+ * 
+ * Opciones disponibles:
+ * - Unidad de temperatura: Celsius/Fahrenheit
+ * - Unidad de velocidad del viento: km/h / mph
+ * - Tema de la aplicación: Claro / Oscuro
+ * 
+ * Las preferencias se pasan entre activities mediante Bundle.
+ */
 class AjustesActivity : AppCompatActivity() {
 
     private lateinit var vinculacion: ActivityAjustesBinding
@@ -66,6 +76,7 @@ class AjustesActivity : AppCompatActivity() {
         }
     }
 
+    /** Carga las preferencias actuales y actualiza los switches y colores */
     private fun cargarPreferencias() {
         vinculacion.switchTemperatura.isChecked = usarFahrenheit
         vinculacion.switchViento.isChecked = usarMph
@@ -76,6 +87,7 @@ class AjustesActivity : AppCompatActivity() {
         actualizarColoresTema(temaOscuro)
     }
 
+    /** Configura los listeners para los switches de preferencias */
     private fun configurarListeners() {
         vinculacion.switchTemperatura.setOnCheckedChangeListener { _, estaActivado ->
             usarFahrenheit = estaActivado
@@ -94,8 +106,11 @@ class AjustesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Actualiza los colores de las etiquetas según el estado del switch.
+     * La opción activa se muestra con el color primario, la inactiva con color gris.
+     */
     private fun actualizarColoresLabels(esActivo: Boolean, labelActivo: TextView, labelInactivo: TextView) {
-        // Usar colores definidos en colors.xml con ContextCompat
         val colorActivo = ContextCompat.getColor(this, R.color.primario_claro)
         val colorInactivo = ContextCompat.getColor(this, R.color.texto_variante_claro)
 
@@ -103,18 +118,25 @@ class AjustesActivity : AppCompatActivity() {
         labelInactivo.setTextColor(if (esActivo) colorInactivo else colorActivo)
     }
 
+    /** Actualiza colores para el selector de temperatura */
     private fun actualizarColoresTemperatura(esFahrenheit: Boolean) {
         actualizarColoresLabels(esFahrenheit, vinculacion.labelFahrenheit, vinculacion.labelCelsius)
     }
 
+    /** Actualiza colores para el selector de velocidad del viento */
     private fun actualizarColoresViento(esMph: Boolean) {
         actualizarColoresLabels(esMph, vinculacion.labelMph, vinculacion.labelKph)
     }
 
+    /** Actualiza colores para el selector de tema */
     private fun actualizarColoresTema(esOscuro: Boolean) {
         actualizarColoresLabels(esOscuro, vinculacion.labelDark, vinculacion.labelLight)
     }
 
+    /**
+     * Aplica el tema seleccionado a toda la aplicación.
+     * Utiliza AppCompatDelegate para cambiar entre modo claro y oscuro.
+     */
     private fun aplicarTema(esOscuro: Boolean) {
         if (esOscuro) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)

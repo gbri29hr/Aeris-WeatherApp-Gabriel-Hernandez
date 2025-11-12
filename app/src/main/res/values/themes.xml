@@ -11,7 +11,6 @@
         <item name="colorSurface">@color/superficie_claro</item>
         <item name="colorOnSurface">@color/sobre_superficie_claro</item>
         <item name="colorOnSurfaceVariant">@color/texto_variante_claro</item>
-        <item name="colorSurfaceContainerLowest">@color/fondo_claro</item>
         <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigationView</item>
     </style>
     

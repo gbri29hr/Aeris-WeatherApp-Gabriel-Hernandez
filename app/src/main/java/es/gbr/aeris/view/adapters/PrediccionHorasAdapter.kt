@@ -11,29 +11,18 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * Adaptador para el RecyclerView de predicción por horas.
- * Muestra la temperatura, hora e icono del clima para cada hora del día.
- *
- * @param datos Lista de predicciones por horas desde la base de datos
- * @param usarFahrenheit Indica si se deben mostrar las temperaturas en Fahrenheit o Celsius
- */
+// Adaptador para mostrar la predicción del clima por horas
 class PrediccionHorasAdapter(
     private var datos: List<PrediccionHorasEntidad> = emptyList(),
     private var usarFahrenheit: Boolean = false
 ) : RecyclerView.Adapter<PrediccionHorasAdapter.PrediccionHorasViewHolder>() {
 
-    /**
-     * ViewHolder que mantiene las referencias a las vistas de cada item.
-     */
+    // ViewHolder para cada elemento de la lista
     class PrediccionHorasViewHolder(
         val vinculacion: ItemPrediccionHorasBinding
     ) : RecyclerView.ViewHolder(vinculacion.root) {
 
-        /**
-         * Vincula los datos de una predicción horaria con las vistas del item.
-         * Resalta visualmente la hora actual con un borde de color.
-         */
+        // Muestra los datos de una hora, resaltando la hora actual con un borde
         fun vincular(elemento: PrediccionHorasEntidad, usarFahrenheit: Boolean) {
             // Mostrar hora
             vinculacion.itemHourlyTime.text = elemento.hora
@@ -93,18 +82,13 @@ class PrediccionHorasAdapter(
         return PrediccionHorasViewHolder(vinculacion)
     }
 
-    /** Vincula los datos de una posición específica con el ViewHolder */
     override fun onBindViewHolder(contenedor: PrediccionHorasViewHolder, posicion: Int) {
         contenedor.vincular(datos[posicion], usarFahrenheit)
     }
 
-    /** Retorna el número total de items en la lista */
     override fun getItemCount(): Int = datos.size
 
-    /**
-     * Actualiza la lista de datos y notifica al RecyclerView para que se redibuje.
-     * Llamado cuando cambian los datos desde el ViewModel.
-     */
+    // Actualiza los datos cuando cambian desde el ViewModel
     fun actualizarDatos(nuevosDatos: List<PrediccionHorasEntidad>) {
         datos = nuevosDatos
         notifyDataSetChanged()

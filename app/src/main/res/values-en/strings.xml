@@ -37,13 +37,7 @@
     <string name="ajustes_tema_dark">Dark</string>
 
     <string name="acerca_de_titulo">About</string>
-    <string name="acerca_de_texto">
-        This application was created as a project.\n\n
-        Version: 1.0\n
-        Developed by: Gabriel Hernández Rodríguez\n\n
-        All weather data is test data
-        stored locally in a SQLite database using Room.
-    </string>
+    <string name="acerca_de_texto">AERIS\n\nThis application has been developed as an educational project using Android development best practices.\n\nAPPLICATION INFORMATION:\n• Version: 1.0\n• Developed by: Gabriel Hernández Rodríguez\n• Date: November 2025\n\nFEATURES:\n• Hourly and daily weather forecast\n• Multiple location management\n• Detailed information on humidity, wind, UV and precipitation\n• Intuitive interface with Material Design\n• Multi-language support (Spanish/English)\n• Light and dark theme\n• Units customization\n\nTECHNOLOGIES USED:\n• Kotlin\n• Android Studio\n• Room Database (SQLite)\n• Material Design Components\n• MVVM Architecture\n• ViewBinding\n• RecyclerView\n• LiveData\n\nNOTE: All weather data displayed in this application is test data stored locally in a SQLite database using Room. This application does not connect to external weather services.\n\n© 2025 Gabriel Hernández Rodríguez\nEducational Project - IES Maestre de Calatrava</string>
 
     <string name="menu_ajustes">Settings</string>
     <string name="menu_ubicaciones">Locations</string>
@@ -51,7 +45,7 @@
 
     <string name="tab_inicio">Home</string>
     
-    <!-- Weather descriptions (6 types matching icons) -->
+    <!-- Descripciones del clima -->
     <string name="clima_soleado">Sunny</string>
     <string name="clima_parcialmente_nublado">Partly Cloudy</string>
     <string name="clima_nublado">Cloudy</string>
@@ -59,7 +53,7 @@
     <string name="clima_tormenta">Stormy</string>
     <string name="clima_nieve">Snowy</string>
     
-    <!-- Dialogs and messages -->
+    <!-- Diálogos y mensajes -->
     <string name="ubicaciones_seleccionar_titulo">Select location</string>
     <string name="ubicaciones_ya_visible">is already visible</string>
     <string name="ubicaciones_cargando">Loading cities…</string>

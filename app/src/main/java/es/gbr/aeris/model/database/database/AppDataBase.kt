@@ -12,6 +12,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.sin
 
+/**
+ * Base de datos principal de la aplicación usando Room.
+ * Contiene todas las entidades relacionadas con el clima y ubicaciones.
+ * 
+ * Utiliza el patrón Singleton para garantizar una única instancia de la BD.
+ * La versión 6 incluye todas las tablas necesarias para el funcionamiento completo.
+ */
 @Database(
     entities = [
         CiudadEntidad::class,
@@ -24,13 +31,20 @@ import kotlin.math.sin
 )
 abstract class AppDataBase : RoomDatabase() {
 
+    /** DAO para acceder a todas las operaciones de base de datos */
     abstract fun weatherDao(): WeatherDao
 
-    // Patrón Singleton
     companion object {
         @Volatile
         private var INSTANCE: AppDataBase? = null
 
+        /**
+         * Obtiene la instancia única de la base de datos.
+         * Si no existe, la crea.
+         * 
+         * @param context Contexto de la aplicación
+         * @return Instancia singleton de AppDataBase
+         */
         fun obtenerBaseDeDatos(context: Context): AppDataBase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -38,8 +52,8 @@ abstract class AppDataBase : RoomDatabase() {
                     AppDataBase::class.java,
                     "weather_app.db"
                 )
-                    .fallbackToDestructiveMigration()
-                    .addCallback(DatabaseCallback())
+                    .fallbackToDestructiveMigration() // Permite recrear la BD si cambia la versión
+                    .addCallback(DatabaseCallback()) // Callback para poblar datos iniciales
                     .build()
                 INSTANCE = instance
                 instance
@@ -50,6 +64,9 @@ abstract class AppDataBase : RoomDatabase() {
 
     private class DatabaseCallback : Callback() {
 
+        /**
+         * Se ejecuta cuando la base de datos se crea por primera vez.
+         */
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             INSTANCE?.let { database ->
@@ -59,10 +76,21 @@ abstract class AppDataBase : RoomDatabase() {
             }
         }
         
+        /**
+         * Genera 24 horas de predicción del tiempo con variaciones realistas.
+         * Simula el ciclo de temperatura durante el día usando función seno.
+         * 
+         * @param cityId ID de la ciudad para la que se genera la predicción
+         * @param tempBase Temperatura base en Celsius
+         * @param iconoBase Código del icono del clima
+         * @return Lista de 24 predicciones horarias
+         */
         private fun generarPrediccion24Horas(cityId: Int, tempBase: Double, iconoBase: String): List<PrediccionHorasEntidad> {
             val horas = mutableListOf<PrediccionHorasEntidad>()
             for (h in 0..23) {
-                // Variación de temperatura durante el día
+                // Variación de temperatura durante el día simulando ciclo natural
+                // Más fría a las 6 AM, más cálida a las 18 PM (±5°C de variación)
+                // Metodo matematico solicitado a la IA para una aplicacion mas realista
                 val variacion = sin((h - 6) * Math.PI / 12) * 5
                 horas.add(PrediccionHorasEntidad(
                     idCiudadFk = cityId,
@@ -74,14 +102,25 @@ abstract class AppDataBase : RoomDatabase() {
             return horas
         }
         
+        /**
+         * Genera predicción para 7 días con temperaturas variadas.
+         * Utiliza los 6 tipos de iconos disponibles en la app para variedad visual.
+         * 
+         * @param cityId ID de la ciudad para la que se genera la predicción
+         * @param tempAlta Temperatura máxima base
+         * @param tempBaja Temperatura mínima base
+         * @param iconoBase Código del icono base (puede variar en los días)
+         * @return Lista de 7 predicciones diarias
+         */
         private fun generarPrediccion7Dias(cityId: Int, tempAlta: Double, tempBaja: Double, iconoBase: String): List<PrediccionDiariaEntidad> {
             val dias = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
-            // Usar variedad de iconos que existen como PNG
+            // Variedad de iconos disponibles en la aplicación para representar diferentes estados del clima
             val iconos = listOf("ic_sol", "ic_parcialmente_nublado", "ic_nublado", "ic_sol", "ic_parcialmente_nublado", "ic_sol", "ic_lluvia")
             return dias.mapIndexed { index, dia ->
                 PrediccionDiariaEntidad(
                     idCiudadFk = cityId,
                     nombreDia = dia,
+                    // Ligera variación de temperatura a lo largo de la semana
                     tempAlta = tempAlta + (index - 3) * 0.5,
                     tempBaja = tempBaja + (index - 3) * 0.3,
                     codigoIcono = iconos[index]
@@ -89,6 +128,10 @@ abstract class AppDataBase : RoomDatabase() {
             }
         }
 
+        /**
+         * Puebla la base de datos con datos iniciales de 20 ciudades españolas.
+         * Para cada ciudad inserta: información básica, tiempo actual, predicción 24h y 7 días.
+         */
         suspend fun populateDatabase(weatherDao: WeatherDao) {
 
             // --- 1. CIUDAD REAL ---

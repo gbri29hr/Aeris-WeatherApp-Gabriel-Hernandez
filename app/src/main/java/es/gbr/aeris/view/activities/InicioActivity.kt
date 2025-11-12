@@ -21,12 +21,9 @@ class InicioActivity : AppCompatActivity() {
         binding = ActivityInicioBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Configurar botón de entrada
         binding.inicioButtonEntrar.setOnClickListener {
-            // Crear Intent para ir a MainActivity
             val intent = Intent(this, MainActivity::class.java)
 
-            // Pasar preferencias por defecto usando Bundle (PDF 2.15_Intent.pdf)
             val bundle = Bundle()
             bundle.putBoolean("usarFahrenheit", false)  // Por defecto Celsius
             bundle.putBoolean("usarMph", false)         // Por defecto km/h
@@ -34,7 +31,7 @@ class InicioActivity : AppCompatActivity() {
             intent.putExtras(bundle)
 
             startActivity(intent)
-            finish() // Cerrar esta Activity para que no vuelva con botón atrás
+            finish()
         }
     }
 }

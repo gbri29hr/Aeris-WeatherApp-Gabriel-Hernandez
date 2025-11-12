@@ -7,7 +7,6 @@ import es.gbr.aeris.model.database.entities.TiempoActualEntidad
 
 /**
  * Clase de relación de Room que combina una ciudad con su tiempo actual.
- * Usa @Embedded y @Relation para realizar un JOIN automático entre tablas.
  */
 data class CiudadConTiempoActual(
     @Embedded

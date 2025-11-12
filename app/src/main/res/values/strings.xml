@@ -37,13 +37,7 @@
     <string name="ajustes_tema_dark">Dark</string>
 
     <string name="acerca_de_titulo">Acerca de</string>
-    <string name="acerca_de_texto">
-        Esta aplicación ha sido creada como proyecto.\n\n
-        Versión: 1.0\n
-        Desarrollada por: Gabriel Hernández Rodríguez\n\n
-        Todos los datos meteorológicos son datos de prueba
-        almacenados localmente en una base de datos SQLite con Room.
-    </string>
+    <string name="acerca_de_texto">AERIS\n\nEsta aplicación ha sido desarrollada como proyecto educativo utilizando las mejores prácticas de desarrollo Android.\n\nINFORMACIÓN DE LA APLICACIÓN:\n• Versión: 1.0\n• Desarrollada por: Gabriel Hernández Rodríguez\n• Fecha: Noviembre 2025\n\nCARACTERÍSTICAS:\n• Pronóstico del tiempo horario y diario\n• Gestión de múltiples ubicaciones\n• Información detallada de humedad, viento, UV y precipitación\n• Interfaz intuitiva con Material Design\n• Soporte multiidioma (Español/Inglés)\n• Tema claro y oscuro\n• Personalización de unidades\n\nTECNOLOGÍAS UTILIZADAS:\n• Kotlin\n• Android Studio\n• Room Database (SQLite)\n• Material Design Components\n• Arquitectura MVVM\n• ViewBinding\n• RecyclerView\n• LiveData\n\nNOTA: Todos los datos meteorológicos mostrados en esta aplicación son datos de prueba almacenados localmente en una base de datos SQLite mediante Room. Esta aplicación no se conecta a servicios externos de meteorología.\n\n© 2025 Gabriel Hernández Rodríguez\nProyecto educativo - IES Maestre de Calatrava</string>
 
     <string name="menu_ajustes">Ajustes</string>
     <string name="menu_ubicaciones">Ubicaciones</string>
@@ -51,15 +45,15 @@
 
     <string name="tab_inicio">Inicio</string>
     
-    <!-- Weather descriptions (6 types matching icons) -->
+    <!-- Descripciones del clima -->
     <string name="clima_soleado">Soleado</string>
-    <string name="clima_parcialmente_nublado">Parcialmente nublado</string>
+    <string name="clima_parcialmente_nublado">Parcialmente Nublado</string>
     <string name="clima_nublado">Nublado</string>
     <string name="clima_lluvioso">Lluvioso</string>
     <string name="clima_tormenta">Tormenta</string>
     <string name="clima_nieve">Nieve</string>
     
-    <!-- Dialogs and messages -->
+    <!-- Diálogos y mensajes -->
     <string name="ubicaciones_seleccionar_titulo">Seleccionar ubicación</string>
     <string name="ubicaciones_ya_visible">ya está visible</string>
     <string name="ubicaciones_cargando">Cargando ciudades…</string>
@@ -75,5 +69,12 @@
     <string name="ubicaciones_multiples_eliminadas">%d ciudad(es) eliminada(s)</string>
     <string name="ubicaciones_no_eliminar_principal_deseleccionar">No puedes eliminar la ubicación principal. Deselecciónala primero.</string>
     <string name="btn_cancelar">Cancelar</string>
+    <string name="main_min">MIN: %s</string>
+    <string name="main_max">MAX: %s</string>
+    <string name="desc_icono_clima">Icono del estado del tiempo</string>
+    <string name="desc_humedad">Icono Humedad</string>
+    <string name="desc_viento">Icono Viento</string>
+    <string name="desc_uv">Icono Índice UV</string>
+    <string name="desc_lluvia">Icono Precipitación</string>
 
 </resources>
