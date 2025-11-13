@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Aeris</string>
+    <string name="inicio_titulo">Check the weather forecast.</string>
 
     <string name="inicio_entrar">Enter</string>
     <string name="inicio_descripcion_icono">Weather application icon</string>
@@ -69,5 +70,14 @@
     <string name="ubicaciones_multiples_eliminadas">%d city(ies) deleted</string>
     <string name="ubicaciones_no_eliminar_principal_deseleccionar">You cannot delete the main location. Deselect it first.</string>
     <string name="btn_cancelar">Cancel</string>
+
+
+    <string name="main_min">MIN: %s</string>
+    <string name="main_max">MAX: %s</string>
+    <string name="desc_icono_clima">Icono del estado del tiempo</string>
+    <string name="desc_humedad">Icon Humidity</string>
+    <string name="desc_viento">Icon Wind</string>
+    <string name="desc_uv">Icon UV Index</string>
+    <string name="desc_lluvia">Icon Precipitation</string>
 
 </resources>
