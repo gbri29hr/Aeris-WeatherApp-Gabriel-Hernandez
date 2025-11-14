@@ -9,20 +9,15 @@ import es.gbr.aeris.model.database.database.AppDataBase
 import es.gbr.aeris.model.database.relations.CiudadConTiempoActual
 import es.gbr.aeris.model.repository.WeatherRepository
 
-/**
- * ViewModel para gestionar las ubicaciones (ciudades).
- * Maneja el filtrado de ciudades según búsqueda del usuario y ciudades ocultas.
- */
+// ViewModel para gestionar ciudades con filtrado y búsqueda
 class LocalizacionesViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: WeatherRepository
     val todasLasCiudadesDB: LiveData<List<CiudadConTiempoActual>>
 
-    // Variables para el filtrado
     private var textoBusquedaActual: String = ""
     private var ciudadesOcultasActuales: Set<Int> = emptySet()
 
-    // LiveData mutable para las ciudades filtradas
     private val _ciudadesFiltradas = MutableLiveData<List<CiudadConTiempoActual>>()
     val ciudadesFiltradas: LiveData<List<CiudadConTiempoActual>> = _ciudadesFiltradas
 
@@ -36,17 +31,11 @@ class LocalizacionesViewModel(application: Application) : AndroidViewModel(appli
         _ciudadesFiltradas.value = emptyList()
     }
 
-    /**
-     * Actualiza la lista de ciudades aplicando los filtros actuales.
-     * Debe ser llamado cada vez que cambian los datos de origen.
-     */
     fun actualizarListaFiltrada(todasLasCiudades: List<CiudadConTiempoActual>) {
         val listaFiltrada = todasLasCiudades
-            // Primero filtrar ciudades ocultas
             .filter { ciudadConTiempo ->
                 !ciudadesOcultasActuales.contains(ciudadConTiempo.ciudad.idCiudad)
             }
-            // Luego filtrar por búsqueda
             .filter { ciudadConTiempo ->
                 if (textoBusquedaActual.isEmpty()) {
                     true
@@ -58,7 +47,6 @@ class LocalizacionesViewModel(application: Application) : AndroidViewModel(appli
     }
 
     /**
-     * Actualiza el texto de búsqueda y reaplica el filtro.
      */
     fun buscarCiudad(texto: String) {
         textoBusquedaActual = texto

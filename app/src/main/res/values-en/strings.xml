@@ -38,7 +38,11 @@
     <string name="ajustes_tema_dark">Dark</string>
 
     <string name="acerca_de_titulo">About</string>
-    <string name="acerca_de_texto">AERIS\n\nThis application has been developed as an educational project using Android development best practices.\n\nAPPLICATION INFORMATION:\n• Version: 1.0\n• Developed by: Gabriel Hernández Rodríguez\n• Date: November 2025\n\nFEATURES:\n• Hourly and daily weather forecast\n• Multiple location management\n• Detailed information on humidity, wind, UV and precipitation\n• Intuitive interface with Material Design\n• Multi-language support (Spanish/English)\n• Light and dark theme\n• Units customization\n\nTECHNOLOGIES USED:\n• Kotlin\n• Android Studio\n• Room Database (SQLite)\n• Material Design Components\n• MVVM Architecture\n• ViewBinding\n• RecyclerView\n• LiveData\n\nNOTE: All weather data displayed in this application is test data stored locally in a SQLite database using Room. This application does not connect to external weather services.\n\n© 2025 Gabriel Hernández Rodríguez\nEducational Project - IES Maestre de Calatrava</string>
+    <string name="acerca_de_texto">AERIS\n\nThis application has been developed as a project using Android Studio.\n\nAPPLICATION INFORMATION:\n• Version: 1.0\n• Developed by: Gabriel Hernández Rodríguez\n\nFEATURES:\n• Hourly and daily weather forecast\n• Multiple location management\n• Detailed information on humidity, wind, UV and precipitation\n• Intuitive interface with Material Design\n• Multi-language support (Spanish/English)\n• Light and dark theme\n•
+        Units customization\n\nTECHNOLOGIES USED:\n• Kotlin\n• Android Studio\n• Room Database (SQLite)\n•
+        Material Design Components\n• MVVM Architecture\n• ViewBinding\n• RecyclerView\n• LiveData\n\nNOTE:
+        All weather data displayed in this application is test data stored locally in a SQLite database using Room.
+        This application does not connect to external weather services. </string>
 
     <string name="menu_ajustes">Settings</string>
     <string name="menu_ubicaciones">Locations</string>
@@ -79,5 +83,7 @@
     <string name="desc_viento">Icon Wind</string>
     <string name="desc_uv">Icon UV Index</string>
     <string name="desc_lluvia">Icon Precipitation</string>
+
+    <string name="mapa_titulo">Location on Map</string>
 
 </resources>

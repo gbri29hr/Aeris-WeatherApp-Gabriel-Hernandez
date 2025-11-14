@@ -7,7 +7,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground"
-    tools:context=".view.activities.AjustesActivity">
+    android:fitsSystemWindows="false"
+    tools:context=".view.activities.AjustesActivity"
+    tools:ignore="HardcodedText">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_ajustes"
@@ -20,7 +22,7 @@
         app:title="@string/ajustes_titulo"
         app:titleCentered="true"
         android:background="?attr/colorSurface"
-        app:titleTextAppearance="?attr/textAppearanceHeadlineMedium" />
+        app:titleTextAppearance="@style/TextAppearance.Aeris.Toolbar.Title" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

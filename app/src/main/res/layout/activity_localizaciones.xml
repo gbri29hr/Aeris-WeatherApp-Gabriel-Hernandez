@@ -7,7 +7,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground"
-    tools:context=".view.activities.LocalizacionesActivity">
+    android:fitsSystemWindows="false"
+    tools:context=".view.activities.LocalizacionesActivity"
+    tools:ignore="HardcodedText">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_localizaciones"
@@ -20,7 +22,7 @@
         app:title="@string/ubicaciones_titulo"
         app:titleCentered="true"
         android:background="?attr/colorSurface"
-        app:titleTextAppearance="?attr/textAppearanceHeadlineMedium" />
+        app:titleTextAppearance="@style/TextAppearance.Aeris.Toolbar.Title" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/locations_search_bar_layout"
@@ -108,6 +110,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_localizacion"
+                android:contentDescription="@string/ubicaciones_usar_actual"
                 app:tint="?attr/colorPrimary" />
 
             <TextView

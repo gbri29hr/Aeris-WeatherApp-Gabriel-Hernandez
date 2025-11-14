@@ -38,7 +38,7 @@
     <string name="ajustes_tema_dark">Dark</string>
 
     <string name="acerca_de_titulo">Acerca de</string>
-    <string name="acerca_de_texto">AERIS\n\nEsta aplicación ha sido desarrollada como proyecto educativo utilizando las mejores prácticas de desarrollo Android.\n\nINFORMACIÓN DE LA APLICACIÓN:\n• Versión: 1.0\n• Desarrollada por: Gabriel Hernández Rodríguez\n• Fecha: Noviembre 2025\n\nCARACTERÍSTICAS:\n• Pronóstico del tiempo horario y diario\n• Gestión de múltiples ubicaciones\n• Información detallada de humedad, viento, UV y precipitación\n• Interfaz intuitiva con Material Design\n• Soporte multiidioma (Español/Inglés)\n• Tema claro y oscuro\n• Personalización de unidades\n\nTECNOLOGÍAS UTILIZADAS:\n• Kotlin\n• Android Studio\n• Room Database (SQLite)\n• Material Design Components\n• Arquitectura MVVM\n• ViewBinding\n• RecyclerView\n• LiveData\n\nNOTA: Todos los datos meteorológicos mostrados en esta aplicación son datos de prueba almacenados localmente en una base de datos SQLite mediante Room. Esta aplicación no se conecta a servicios externos de meteorología.\n\n© 2025 Gabriel Hernández Rodríguez\nProyecto educativo - IES Maestre de Calatrava</string>
+    <string name="acerca_de_texto">AERIS\n\nEsta aplicación ha sido desarrollada como proyecto utilizando Android Studio.\n\nINFORMACIÓN DE LA APLICACIÓN:\n• Versión: 1.0\n• Desarrollada por: Gabriel Hernández Rodríguez\n\nCARACTERÍSTICAS:\n• Pronóstico del tiempo horario y diario\n• Gestión de múltiples ubicaciones\n• Información detallada de humedad, viento, UV y precipitación\n• Interfaz intuitiva con Material Design\n• Soporte multiidioma (Español/Inglés)\n• Tema claro y oscuro\n• Personalización de unidades\n\nTECNOLOGÍAS UTILIZADAS:\n• Kotlin\n• Android Studio\n• Room Database (SQLite)\n• Material Design Components\n• Arquitectura MVVM\n• ViewBinding\n• RecyclerView\n• LiveData\n\nNOTA: Todos los datos meteorológicos mostrados en esta aplicación son datos de prueba almacenados localmente en una base de datos SQLite mediante Room. Esta aplicación no se conecta a servicios externos de meteorología.</string>
 
     <string name="menu_ajustes">Ajustes</string>
     <string name="menu_ubicaciones">Ubicaciones</string>
@@ -77,5 +77,7 @@
     <string name="desc_viento">Icono Viento</string>
     <string name="desc_uv">Icono Índice UV</string>
     <string name="desc_lluvia">Icono Precipitación</string>
+
+    <string name="mapa_titulo">Ubicación en el Mapa</string>
 
 </resources>

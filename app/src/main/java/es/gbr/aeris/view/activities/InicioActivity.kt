@@ -1,5 +1,6 @@
 package es.gbr.aeris.view.activities
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
@@ -25,9 +26,13 @@ class InicioActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
 
             val bundle = Bundle()
-            bundle.putBoolean("usarFahrenheit", false)  // Por defecto Celsius
-            bundle.putBoolean("usarMph", false)         // Por defecto km/h
-            bundle.putBoolean("temaOscuro", false)      // Por defecto tema claro
+            bundle.putBoolean("usarFahrenheit", false)
+            bundle.putBoolean("usarMph", false)
+            
+            // Detectar el tema del sistema
+            val esTemaOscuro = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+            bundle.putBoolean("temaOscuro", esTemaOscuro)
+            
             intent.putExtras(bundle)
 
             startActivity(intent)

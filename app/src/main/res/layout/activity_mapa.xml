@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    android:fitsSystemWindows="false"
+    tools:context=".view.activities.MapaActivity"
+    tools:ignore="HardcodedText">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorSurface"
+        app:title="@string/mapa_titulo"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/TextAppearance.Aeris.Toolbar.Title"
+        app:navigationIcon="@drawable/ic_arrow_back_negro"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/webViewContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?android:attr/colorBackground"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <android.webkit.WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/mapa_titulo" />
+
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

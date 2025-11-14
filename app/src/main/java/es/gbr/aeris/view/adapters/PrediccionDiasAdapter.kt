@@ -10,25 +10,21 @@ import es.gbr.aeris.model.database.entities.PrediccionDiariaEntidad
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Adaptador para mostrar la predicción del clima por días
+// Adaptador para el RecyclerView de predicción por días
 class PrediccionDiasAdapter(
     private var datos: List<PrediccionDiariaEntidad> = emptyList(),
     private var usarFahrenheit: Boolean = false
 ) : RecyclerView.Adapter<PrediccionDiasAdapter.PrediccionDiasViewHolder>() {
 
-    // ViewHolder para cada elemento de la lista
     class PrediccionDiasViewHolder(
         val vinculacion: ItemPrediccionDiasBinding
     ) : RecyclerView.ViewHolder(vinculacion.root) {
 
-        // Muestra los datos de un día con dos líneas de texto
         fun vincular(elemento: PrediccionDiariaEntidad, usarFahrenheit: Boolean, posicion: Int) {
-            // Mostrar día traducido según idioma (Lunes/Monday)
             vinculacion.itemDailyDayPrimary.text = DatosCompartidos.traducirDia(
                 vinculacion.root.context, elemento.nombreDia
             )
             
-            // Calcular y mostrar el día siguiente al actual (posicion + 2)
             val calendario = Calendar.getInstance()
             calendario.add(Calendar.DAY_OF_YEAR, posicion + 2)
             val formatoDia = SimpleDateFormat("EEEE", Locale.getDefault())

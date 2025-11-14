@@ -2,6 +2,7 @@ package es.gbr.aeris.view.activities
 
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +38,12 @@ class AjustesActivity : AppCompatActivity() {
             usarFahrenheit = it.getBoolean("usarFahrenheit", false)
             usarMph = it.getBoolean("usarMph", false)
             temaOscuro = it.getBoolean("temaOscuro", false)
+        }
+
+        // Si no viene del intent, detectar tema del sistema
+        if (!intent.hasExtra("temaOscuro")) {
+            val esTemaOscuroSistema = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+            temaOscuro = esTemaOscuroSistema
         }
 
         cargarPreferencias()

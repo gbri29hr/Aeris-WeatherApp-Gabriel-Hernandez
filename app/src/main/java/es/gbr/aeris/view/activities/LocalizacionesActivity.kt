@@ -16,23 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import es.gbr.aeris.model.DatosCompartidos
 import es.gbr.aeris.viewmodel.LocalizacionesViewModel
 
-/**
- * Activity que gestiona la lista de ubicaciones/ciudades guardadas.
- * Permite buscar, añadir y eliminar ciudades de la lista visible.
- * 
- * Características:
- * - Búsqueda en tiempo real de ciudades
- * - Modo de eliminación múltiple
- * - Marcar ciudad como principal (ubicación actual)
- * - Las ciudades se ocultan pero no se borran de la BD
- */
+// Gestiona la lista de ciudades guardadas
 class LocalizacionesActivity : AppCompatActivity() {
 
     private lateinit var vinculacion: ActivityLocalizacionesBinding
     private val modeloVista: LocalizacionesViewModel by viewModels()
     private lateinit var adaptadorLocalizacion: LocalizacionAdapter
     
-    // Preferencias recibidas desde otras activities
     private var usarFahrenheit: Boolean = false
     private var usarMph: Boolean = false
     private var temaOscuro: Boolean = false
@@ -58,20 +48,17 @@ class LocalizacionesActivity : AppCompatActivity() {
         observarDatos()
     }
     
-    // Actualiza la ciudad principal cuando volvemos a esta pantalla
     override fun onResume() {
         super.onResume()
         adaptadorLocalizacion.actualizarCiudadPrincipal(DatosCompartidos.idCiudadSeleccionada)
     }
 
-    // Configurar el botón de añadir ciudad
     private fun configurarBotonAnadir() {
         vinculacion.btnAddLocation.setOnClickListener {
             mostrarDialogoAnadirCiudad()
         }
     }
     
-    // Muestra un diálogo con todas las ciudades disponibles
     private fun mostrarDialogoAnadirCiudad() {
         modeloVista.todasLasCiudadesDB.value?.let { todasLasCiudades ->
             if (todasLasCiudades.isEmpty()) {
@@ -81,11 +68,10 @@ class LocalizacionesActivity : AppCompatActivity() {
 
             val ciudadesOcultas = obtenerCiudadesOcultas()
             
-            // Lista de nombres de ciudades con indicador si ya está visible
-            val nombresCiudades = todasLasCiudades.map { 
+            val nombresCiudades = todasLasCiudades.map {
                 val estaOculta = ciudadesOcultas.contains(it.ciudad.idCiudad)
                 if (estaOculta) {
-                    "${it.ciudad.nombre}"
+                    it.ciudad.nombre
                 } else {
                     "${it.ciudad.nombre} ✓"
                 }
@@ -225,13 +211,8 @@ class LocalizacionesActivity : AppCompatActivity() {
     // Configurar el buscador de ciudades
     private fun configurarBusqueda() {
         vinculacion.locationsSearchBarEdittext.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // No se necesita implementación
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 modeloVista.buscarCiudad(s.toString())
             }
@@ -259,8 +240,18 @@ class LocalizacionesActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Abre MapaActivity mostrando la información de ubicación de la ciudad seleccionada.
+     * Pasa datos mediante Bundle (latitud, longitud y nombre).
+     */
     private fun seleccionarCiudad(ciudad: CiudadEntidad) {
-
+        val intencion = Intent(this, MapaActivity::class.java)
+        val bundle = Bundle()
+        bundle.putDouble("latitud", ciudad.latitud)
+        bundle.putDouble("longitud", ciudad.longitud)
+        bundle.putString("nombreCiudad", ciudad.nombre)
+        intencion.putExtras(bundle)
+        startActivity(intencion)
     }
 
     /**

@@ -4,10 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Entidad de Room que representa la tabla 'ciudades' en la base de datos.
- * Almacena información básica de cada ciudad disponible en la aplicación.
- */
+// Tabla de ciudades en la BD
 @Entity(tableName = "ciudades")
 data class CiudadEntidad(
     @PrimaryKey(autoGenerate = true)

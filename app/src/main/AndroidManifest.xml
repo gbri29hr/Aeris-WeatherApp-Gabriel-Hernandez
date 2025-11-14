@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Manifiesto de la aplicación Aeris - App del Clima
-    Define las actividades, permisos y configuración general de la aplicación
--->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permiso para acceder a Internet para WebView -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Declaración de queries para Android 11+ -->
+    <!-- Permite consultar si Google Maps está instalado -->
+    <queries>
+        <package android:name="com.google.android.apps.maps" />
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -14,8 +19,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_app_round"
         android:supportsRtl="true"
-        android:theme="@style/Aeris.Theme">
-        
+        android:theme="@style/Aeris.Theme"
+        android:localeConfig="@xml/locales_config"
+        tools:targetApi="33">
+
         <!-- Activity principal que muestra el clima actual y pronósticos -->
         <activity
             android:name=".view.activities.MainActivity"
@@ -31,6 +38,11 @@
             android:name=".view.activities.LocalizacionesActivity"
             android:exported="false" />
         
+        <!-- Activity que muestra información de ubicación y abre Google Maps -->
+        <activity
+            android:name=".view.activities.MapaActivity"
+            android:exported="false" />
+
         <!-- Activity de inicio/splash - Punto de entrada de la aplicación -->
         <activity
             android:name=".view.activities.InicioActivity"

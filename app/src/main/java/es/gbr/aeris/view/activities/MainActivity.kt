@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.LinearLayoutManager
 import es.gbr.aeris.R
 import es.gbr.aeris.databinding.ActivityMainBinding
@@ -19,55 +18,74 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Activity principal de la aplicación que muestra el clima actual y pronósticos.
- * Implementa el patrón MVVM con ViewBinding y LiveData.
+ * Activity principal de la aplicación que muestra el clima actual y los pronósticos.
+ *
+ * Funcionalidades:
+ * - Muestra temperatura actual, descripción del clima e icono
+ * - Presenta temperaturas mínima y máxima del día
+ * - RecyclerView horizontal con pronóstico por horas (24 horas)
+ * - RecyclerView vertical con pronóstico diario (7 días)
+ * - Cards con datos detallados: humedad, viento, índice UV y precipitación
+ * - Selector de ciudad mediante AlertDialog
+ * - Conversión automática de unidades (°C/°F, km/h/mph)
+ * - Navegación inferior (BottomNavigationView)
+ *
+ * Arquitectura MVVM: Esta Activity observa cambios en el ViewModel mediante LiveData
+ * y actualiza la UI automáticamente cuando los datos cambian.
  */
 class MainActivity : AppCompatActivity() {
 
+    // ViewBinding para acceso seguro a las vistas del layout
     private lateinit var vinculacion: ActivityMainBinding
+
+    // ViewModel que gestiona los datos del clima (arquitectura MVVM)
     private val modeloVista: MainViewModel by viewModels()
+
+    // Adaptadores para los RecyclerViews de pronósticos
     private lateinit var adaptadorHoras: PrediccionHorasAdapter
     private lateinit var adaptadorDias: PrediccionDiasAdapter
-    private var latitudActual: Double = 0.0
-    private var longitudActual: Double = 0.0
 
-    // Preferencias del usuario recibidas mediante Bundle
-    private var usarFahrenheit: Boolean = false
-    private var usarMph: Boolean = false
-    private var temaOscuro: Boolean = false
+    // Preferencias del usuario recibidas mediante Bundle desde otras Activities
+    private var usarFahrenheit: Boolean = false  // true = Fahrenheit, false = Celsius
+    private var usarMph: Boolean = false  // true = MPH, false = Km/h
+    private var temaOscuro: Boolean = false  // true = Oscuro, false = Claro
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Recuperar preferencias del usuario desde el Bundle (Intent)
+        // Estas preferencias vienen de InicioActivity o AjustesActivity
         intent.extras?.let {
             usarFahrenheit = it.getBoolean("usarFahrenheit", false)
             usarMph = it.getBoolean("usarMph", false)
             temaOscuro = it.getBoolean("temaOscuro", false)
         }
 
-        AppCompatDelegate.setDefaultNightMode(
-            if (temaOscuro) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
-
+        // Inicializar ViewBinding para acceso a las vistas
         vinculacion = ActivityMainBinding.inflate(layoutInflater)
         setContentView(vinculacion.root)
 
+        // Establecer la ciudad seleccionada en el ViewModel desde datos compartidos
         modeloVista.cambiarCiudadSeleccionada(DatosCompartidos.idCiudadSeleccionada)
 
+        // Configurar componentes de la interfaz
         configurarRecyclerViews()
         observarDatos()
         configurarBotonSeleccionCiudad()
         configurarBotonScrollAbajo()
 
+        // Marcar la opción "Inicio" como seleccionada en el menú de navegación
         vinculacion.bottomNavigation.selectedItemId = R.id.nav_home
 
+        // Configurar listeners para el menú de navegación inferior
         vinculacion.bottomNavigation.setOnItemSelectedListener { elemento ->
             when (elemento.itemId) {
                 R.id.nav_home -> {
+                    // Ya estamos en Home, no hacer nada
                     true
                 }
                 R.id.nav_localizaciones -> {
+                    // Navegar a LocalizacionesActivity pasando las preferencias mediante Bundle
                     val intencion = Intent(this, LocalizacionesActivity::class.java)
                     val bundle = Bundle()
                     bundle.putBoolean("usarFahrenheit", usarFahrenheit)
@@ -75,10 +93,11 @@ class MainActivity : AppCompatActivity() {
                     bundle.putBoolean("temaOscuro", temaOscuro)
                     intencion.putExtras(bundle)
                     startActivity(intencion)
-                    finish()
+                    finish()  // Finalizar esta Activity para evitar acumulación en el stack
                     true
                 }
                 R.id.nav_settings -> {
+                    // Navegar a AjustesActivity pasando las preferencias mediante Bundle
                     val intencion = Intent(this, AjustesActivity::class.java)
                     val bundle = Bundle()
                     bundle.putBoolean("usarFahrenheit", usarFahrenheit)
@@ -86,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                     bundle.putBoolean("temaOscuro", temaOscuro)
                     intencion.putExtras(bundle)
                     startActivity(intencion)
-                    finish()
+                    finish()  // Finalizar esta Activity para evitar acumulación en el stack
                     true
                 }
                 else -> false
@@ -138,8 +157,6 @@ class MainActivity : AppCompatActivity() {
                 val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
                 if (ciudadActual != null) {
                     vinculacion.mainTextCity.text = ciudadActual.nombre
-                    latitudActual = ciudadActual.latitud
-                    longitudActual = ciudadActual.longitud
                 }
             }
         }
@@ -150,43 +167,52 @@ class MainActivity : AppCompatActivity() {
                 val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
                 if (ciudadActual != null) {
                     vinculacion.mainTextCity.text = ciudadActual.nombre
-                    latitudActual = ciudadActual.latitud
-                    longitudActual = ciudadActual.longitud
                 }
             }
         }
     }
 
+    /**
+     * Actualiza todos los elementos de la vista principal con los datos del clima.
+     * Realiza conversiones de unidades según las preferencias del usuario.
+     *
+     * @param tiempo Entidad con los datos del tiempo actual de la base de datos
+     */
     private fun actualizarVistaPrincipal(tiempo: TiempoActualEntidad) {
-
+        // Convertir temperaturas según preferencia del usuario
         val temperatura = if (usarFahrenheit) celsiusAFahrenheit(tiempo.temperatura) else tiempo.temperatura
         val maxima = if (usarFahrenheit) celsiusAFahrenheit(tiempo.tempAlta) else tiempo.tempAlta
         val minima = if (usarFahrenheit) celsiusAFahrenheit(tiempo.tempBaja) else tiempo.tempBaja
-        val viento = if (usarMph) kphAMph(tiempo.vientoVelocidad) else tiempo.vientoVelocidad
 
+        // Convertir velocidad del viento según preferencia del usuario
+        val viento = if (usarMph) kphAMph(tiempo.vientoVelocidad) else tiempo.vientoVelocidad
         val unidadViento = if (usarMph) "mph" else "km/h"
 
+        // Actualizar textos principales del clima
         vinculacion.mainTextTemperature.text = "${temperatura.toInt()}°"
         vinculacion.mainTextDescription.text = DatosCompartidos.traducirDescripcion(this, tiempo.descripcion)
         vinculacion.mainTextMin.text = "MIN: ${minima.toInt()}°"
         vinculacion.mainTextMax.text = "MAX: ${maxima.toInt()}°"
 
-        // Mostrar la fecha actual con idioma del sistema
+        // Mostrar la fecha actual con formato localizado según idioma del sistema
         val formateadorFecha = SimpleDateFormat("EEEE, MMM dd, HH:mm", Locale.getDefault())
         vinculacion.mainTextDate.text = formateadorFecha.format(Date())
 
-        // Actualizar detalles del clima
+        // Actualizar cards con detalles del clima
         vinculacion.detailHumedad.text = "${tiempo.humedad.toInt()}%"
         vinculacion.detailViento.text = "${viento.toInt()} $unidadViento"
         vinculacion.detailUv.text = "${tiempo.uvIndice.toInt()} (${obtenerNivelUV(tiempo.uvIndice.toInt())})"
-        
-        // Usar el valor fijo de precipitación de la base de datos
         vinculacion.detailPrecipitacion.text = "${tiempo.precipitacion}%"
 
-        // Cargar icono del clima
+        // Cargar y mostrar el icono del clima correspondiente
         cargarIconoClima(tiempo.codigoIcono)
     }
 
+    /**
+     * Carga el icono del clima según el código recibido de la base de datos.
+     *
+     * @param codigoIcono Nombre del drawable del icono (ej: "ic_sol", "ic_lluvia")
+     */
     private fun cargarIconoClima(codigoIcono: String) {
         val idRecurso = when(codigoIcono) {
             "ic_sol" -> R.drawable.ic_sol
@@ -203,6 +229,12 @@ class MainActivity : AppCompatActivity() {
         vinculacion.mainImageWeather.setImageResource(idRecurso)
     }
 
+    /**
+     * Determina el nivel de riesgo del índice UV según estándares internacionales.
+     *
+     * @param indice Valor numérico del índice UV
+     * @return String localizado: "Bajo", "Medio" o "Alto"
+     */
     private fun obtenerNivelUV(indice: Int): String {
         return when {
             indice <= 2 -> getString(R.string.main_bajo)
@@ -211,19 +243,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Convierte Celsius a Fahrenheit
+    /**
+     * Convierte temperatura de Celsius a Fahrenheit.
+     * Fórmula: F = (C × 9/5) + 32
+     */
     private fun celsiusAFahrenheit(celsius: Double): Double = (celsius * 9/5) + 32
 
-    // Convierte km/h a mph
+    /**
+     * Convierte velocidad de km/h a millas por hora.
+     * Factor: 1 mph = 1.609 km/h
+     */
     private fun kphAMph(kph: Double): Double = kph / 1.609
 
-    // Configurar botón de selección de ciudad
+    /**
+     * Configura el botón para mostrar el diálogo de selección de ciudad.
+     */
     private fun configurarBotonSeleccionCiudad() {
         vinculacion.mainButtonSelectCity.setOnClickListener {
             mostrarDialogoSeleccionCiudad()
         }
     }
 
+    /**
+     * Configura el FAB para hacer scroll suave hacia el pronóstico horario.
+     */
     private fun configurarBotonScrollAbajo() {
         vinculacion.mainButtonScrollDown.setOnClickListener {
             // Hacer scroll hasta el título "PRONOSTICO HORARIO"
@@ -233,6 +276,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Muestra un AlertDialog con todas las ciudades disponibles.
+     * Al seleccionar una ciudad, actualiza automáticamente todos los datos.
+     */
     private fun mostrarDialogoSeleccionCiudad() {
         modeloVista.todasLasCiudades.value?.let { ciudades ->
             if (ciudades.isEmpty()) {
@@ -255,9 +302,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Método del ciclo de vida. Refresca la vista cuando vuelve a primer plano.
+     */
     override fun onResume() {
         super.onResume()
-        // Recargar preferencias y actualizar vista cuando volvemos a la activity
+        // Recargar vista cuando volvemos a la activity
         modeloVista.tiempoActual.value?.let { actualizarVistaPrincipal(it) }
     }
 }
