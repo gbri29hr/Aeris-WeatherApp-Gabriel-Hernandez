@@ -13,11 +13,7 @@ import es.gbr.aeris.databinding.ActivityAjustesBinding
 
 /**
  * Activity que permite configurar las preferencias de la aplicación.
- * 
- * Opciones disponibles:
- * - Unidad de temperatura: Celsius/Fahrenheit
- * - Unidad de velocidad del viento: km/h / mph
- * - Tema de la aplicación: Claro / Oscuro
+ *
  * 
  * Las preferencias se pasan entre activities mediante Bundle.
  */
@@ -83,7 +79,7 @@ class AjustesActivity : AppCompatActivity() {
         }
     }
 
-    /** Carga las preferencias actuales y actualiza los switches y colores */
+    // Carga las preferencias actuales y actualiza los switches y colores
     private fun cargarPreferencias() {
         vinculacion.switchTemperatura.isChecked = usarFahrenheit
         vinculacion.switchViento.isChecked = usarMph
@@ -94,7 +90,7 @@ class AjustesActivity : AppCompatActivity() {
         actualizarColoresTema(temaOscuro)
     }
 
-    /** Configura los listeners para los switches de preferencias */
+    // Configura los listeners para los switches de preferencias
     private fun configurarListeners() {
         vinculacion.switchTemperatura.setOnCheckedChangeListener { _, estaActivado ->
             usarFahrenheit = estaActivado
@@ -125,17 +121,17 @@ class AjustesActivity : AppCompatActivity() {
         labelInactivo.setTextColor(if (esActivo) colorInactivo else colorActivo)
     }
 
-    /** Actualiza colores para el selector de temperatura */
+    // Actualiza colores para el selector de temperatura
     private fun actualizarColoresTemperatura(esFahrenheit: Boolean) {
         actualizarColoresLabels(esFahrenheit, vinculacion.labelFahrenheit, vinculacion.labelCelsius)
     }
 
-    /** Actualiza colores para el selector de velocidad del viento */
+    // Actualiza colores para el selector de velocidad del viento
     private fun actualizarColoresViento(esMph: Boolean) {
         actualizarColoresLabels(esMph, vinculacion.labelMph, vinculacion.labelKph)
     }
 
-    /** Actualiza colores para el selector de tema */
+    // Actualiza colores para el selector de tema
     private fun actualizarColoresTema(esOscuro: Boolean) {
         actualizarColoresLabels(esOscuro, vinculacion.labelDark, vinculacion.labelLight)
     }

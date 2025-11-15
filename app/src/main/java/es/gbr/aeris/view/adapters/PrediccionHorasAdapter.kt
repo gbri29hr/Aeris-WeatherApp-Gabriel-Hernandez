@@ -66,7 +66,7 @@ class PrediccionHorasAdapter(
         }
     }
 
-    /** Crea un nuevo ViewHolder inflando el layout del item */
+     // Crea un nuevo ViewHolder inflando el layout del item
     override fun onCreateViewHolder(padre: ViewGroup, tipoVista: Int): PrediccionHorasViewHolder {
         val vinculacion = ItemPrediccionHorasBinding.inflate(
             LayoutInflater.from(padre.context),

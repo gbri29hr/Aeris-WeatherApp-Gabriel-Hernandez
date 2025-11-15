@@ -17,7 +17,6 @@ import es.gbr.aeris.model.repository.WeatherRepository
  * ViewModel principal que gestiona los datos del clima para MainActivity.
  * Implementa el patrón MVVM actuando como intermediario entre la vista y el repositorio.
  *
- * Responsabilidades:
  * - Obtener y gestionar datos del clima desde el repositorio
  * - Mantener el estado de la ciudad seleccionada
  * - Proporcionar LiveData observables para la actualización reactiva de la UI

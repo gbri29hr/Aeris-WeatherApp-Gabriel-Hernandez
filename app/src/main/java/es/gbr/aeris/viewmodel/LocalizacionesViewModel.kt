@@ -46,8 +46,7 @@ class LocalizacionesViewModel(application: Application) : AndroidViewModel(appli
         _ciudadesFiltradas.value = listaFiltrada
     }
 
-    /**
-     */
+
     fun buscarCiudad(texto: String) {
         textoBusquedaActual = texto
         todasLasCiudadesDB.value?.let { actualizarListaFiltrada(it) }

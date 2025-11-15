@@ -20,15 +20,6 @@ import java.util.Locale
 /**
  * Activity principal de la aplicación que muestra el clima actual y los pronósticos.
  *
- * Funcionalidades:
- * - Muestra temperatura actual, descripción del clima e icono
- * - Presenta temperaturas mínima y máxima del día
- * - RecyclerView horizontal con pronóstico por horas (24 horas)
- * - RecyclerView vertical con pronóstico diario (7 días)
- * - Cards con datos detallados: humedad, viento, índice UV y precipitación
- * - Selector de ciudad mediante AlertDialog
- * - Conversión automática de unidades (°C/°F, km/h/mph)
- * - Navegación inferior (BottomNavigationView)
  *
  * Arquitectura MVVM: Esta Activity observa cambios en el ViewModel mediante LiveData
  * y actualiza la UI automáticamente cuando los datos cambian.
@@ -85,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_localizaciones -> {
-                    // Navegar a LocalizacionesActivity pasando las preferencias mediante Bundle
+                    // Ir a LocalizacionesActivity pasando las preferencias mediante Bundle
                     val intencion = Intent(this, LocalizacionesActivity::class.java)
                     val bundle = Bundle()
                     bundle.putBoolean("usarFahrenheit", usarFahrenheit)
@@ -97,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_settings -> {
-                    // Navegar a AjustesActivity pasando las preferencias mediante Bundle
+                    // Ir a AjustesActivity pasando las preferencias mediante Bundle
                     val intencion = Intent(this, AjustesActivity::class.java)
                     val bundle = Bundle()
                     bundle.putBoolean("usarFahrenheit", usarFahrenheit)
@@ -115,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Configura los RecyclerViews para mostrar pronósticos horarios y diarios.
-     * Utiliza LayoutManagers horizontal y vertical.
+     * Utiliza Layout horizontal y vertical.
      */
     private fun configurarRecyclerViews() {
         adaptadorHoras = PrediccionHorasAdapter(usarFahrenheit = usarFahrenheit)
@@ -194,7 +185,7 @@ class MainActivity : AppCompatActivity() {
         vinculacion.mainTextMin.text = "MIN: ${minima.toInt()}°"
         vinculacion.mainTextMax.text = "MAX: ${maxima.toInt()}°"
 
-        // Mostrar la fecha actual con formato localizado según idioma del sistema
+        // Muestra la fecha actual con formato localizado según idioma del sistema
         val formateadorFecha = SimpleDateFormat("EEEE, MMM dd, HH:mm", Locale.getDefault())
         vinculacion.mainTextDate.text = formateadorFecha.format(Date())
 
@@ -302,9 +293,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Método del ciclo de vida. Refresca la vista cuando vuelve a primer plano.
-     */
+
+     // Método del ciclo de vida. Refresca la vista cuando vuelve a primer plano.
+
     override fun onResume() {
         super.onResume()
         // Recargar vista cuando volvemos a la activity

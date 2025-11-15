@@ -9,7 +9,6 @@ import es.gbr.aeris.R
  * Implementa el patrón Singleton de Kotlin usando la palabra clave 'object',
  * lo que garantiza una única instancia accesible globalmente.
  *
- * Responsabilidades:
  * - Mantener el ID de la ciudad actualmente seleccionada
  * - Gestionar el conjunto de ciudades ocultas/eliminadas
  * - Proporcionar funciones de traducción de clima según idioma del sistema
