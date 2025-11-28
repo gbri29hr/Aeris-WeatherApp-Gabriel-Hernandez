@@ -14,7 +14,7 @@ data class CiudadConTiempoActual(
 
     @Relation(
         parentColumn = "id_ciudad",
-        entityColumn = "id_ciudad_fk"
+        entityColumn = "fk_id_ciudad"
     )
     val tiempoActual: TiempoActualEntidad?
 )

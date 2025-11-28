@@ -27,14 +27,15 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     // ViewBinding para acceso seguro a las vistas del layout
-    private lateinit var vinculacion: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     // ViewModel que gestiona los datos del clima (arquitectura MVVM)
     private val modeloVista: MainViewModel by viewModels()
 
     // Adaptadores para los RecyclerViews de pronósticos
-    private lateinit var adaptadorHoras: PrediccionHorasAdapter
-    private lateinit var adaptadorDias: PrediccionDiasAdapter
+    lateinit var adaptadorHoras: PrediccionHorasAdapter
+    lateinit var adaptadorDias: PrediccionDiasAdapter
+
 
     // Preferencias del usuario recibidas mediante Bundle desde otras Activities
     private var usarFahrenheit: Boolean = false  // true = Fahrenheit, false = Celsius
@@ -43,6 +44,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
 
         // Recuperar preferencias del usuario desde el Bundle (Intent)
         // Estas preferencias vienen de InicioActivity o AjustesActivity
@@ -53,8 +56,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Inicializar ViewBinding para acceso a las vistas
-        vinculacion = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(vinculacion.root)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Establecer la ciudad seleccionada en el ViewModel desde datos compartidos
         modeloVista.cambiarCiudadSeleccionada(DatosCompartidos.idCiudadSeleccionada)
@@ -66,10 +69,10 @@ class MainActivity : AppCompatActivity() {
         configurarBotonScrollAbajo()
 
         // Marcar la opción "Inicio" como seleccionada en el menú de navegación
-        vinculacion.bottomNavigation.selectedItemId = R.id.nav_home
+        binding.bottomNavigation.selectedItemId = R.id.nav_home
 
         // Configurar listeners para el menú de navegación inferior
-        vinculacion.bottomNavigation.setOnItemSelectedListener { elemento ->
+        binding.bottomNavigation.setOnItemSelectedListener { elemento ->
             when (elemento.itemId) {
                 R.id.nav_home -> {
                     // Ya estamos en Home, no hacer nada
@@ -110,14 +113,14 @@ class MainActivity : AppCompatActivity() {
      */
     private fun configurarRecyclerViews() {
         adaptadorHoras = PrediccionHorasAdapter(usarFahrenheit = usarFahrenheit)
-        vinculacion.mainRecyclerHourly.apply {
+        binding.mainRecyclerHourly.apply {
             layoutManager =
                 LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = adaptadorHoras
         }
 
         adaptadorDias = PrediccionDiasAdapter(usarFahrenheit = usarFahrenheit)
-        vinculacion.mainRecyclerDaily.apply {
+        binding.mainRecyclerDaily.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = adaptadorDias
         }
@@ -147,7 +150,7 @@ class MainActivity : AppCompatActivity() {
             modeloVista.todasLasCiudades.value?.let { ciudades ->
                 val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
                 if (ciudadActual != null) {
-                    vinculacion.mainTextCity.text = ciudadActual.nombre
+                    binding.mainTextCity.text = ciudadActual.nombre
                 }
             }
         }
@@ -157,7 +160,7 @@ class MainActivity : AppCompatActivity() {
             modeloVista.idCiudadSeleccionada.value?.let { idSeleccionado ->
                 val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
                 if (ciudadActual != null) {
-                    vinculacion.mainTextCity.text = ciudadActual.nombre
+                    binding.mainTextCity.text = ciudadActual.nombre
                 }
             }
         }
@@ -180,20 +183,20 @@ class MainActivity : AppCompatActivity() {
         val unidadViento = if (usarMph) "mph" else "km/h"
 
         // Actualizar textos principales del clima
-        vinculacion.mainTextTemperature.text = "${temperatura.toInt()}°"
-        vinculacion.mainTextDescription.text = DatosCompartidos.traducirDescripcion(this, tiempo.descripcion)
-        vinculacion.mainTextMin.text = "MIN: ${minima.toInt()}°"
-        vinculacion.mainTextMax.text = "MAX: ${maxima.toInt()}°"
+        binding.mainTextTemperature.text = "${temperatura.toInt()}°"
+        binding.mainTextDescription.text = DatosCompartidos.traducirDescripcion(this, tiempo.descripcion)
+        binding.mainTextMin.text = "MIN: ${minima.toInt()}°"
+        binding.mainTextMax.text = "MAX: ${maxima.toInt()}°"
 
         // Muestra la fecha actual con formato localizado según idioma del sistema
         val formateadorFecha = SimpleDateFormat("EEEE, MMM dd, HH:mm", Locale.getDefault())
-        vinculacion.mainTextDate.text = formateadorFecha.format(Date())
+        binding.mainTextDate.text = formateadorFecha.format(Date())
 
         // Actualizar cards con detalles del clima
-        vinculacion.detailHumedad.text = "${tiempo.humedad.toInt()}%"
-        vinculacion.detailViento.text = "${viento.toInt()} $unidadViento"
-        vinculacion.detailUv.text = "${tiempo.uvIndice.toInt()} (${obtenerNivelUV(tiempo.uvIndice.toInt())})"
-        vinculacion.detailPrecipitacion.text = "${tiempo.precipitacion}%"
+        binding.detailHumedad.text = "${tiempo.humedad.toInt()}%"
+        binding.detailViento.text = "${viento.toInt()} $unidadViento"
+        binding.detailUv.text = "${tiempo.uvIndice.toInt()} (${obtenerNivelUV(tiempo.uvIndice.toInt())})"
+        binding.detailPrecipitacion.text = "${tiempo.precipitacion}%"
 
         // Cargar y mostrar el icono del clima correspondiente
         cargarIconoClima(tiempo.codigoIcono)
@@ -217,7 +220,7 @@ class MainActivity : AppCompatActivity() {
                 if (id != 0) id else R.drawable.ic_sol
             }
         }
-        vinculacion.mainImageWeather.setImageResource(idRecurso)
+        binding.mainImageWeather.setImageResource(idRecurso)
     }
 
     /**
@@ -250,7 +253,7 @@ class MainActivity : AppCompatActivity() {
      * Configura el botón para mostrar el diálogo de selección de ciudad.
      */
     private fun configurarBotonSeleccionCiudad() {
-        vinculacion.mainButtonSelectCity.setOnClickListener {
+        binding.mainButtonSelectCity.setOnClickListener {
             mostrarDialogoSeleccionCiudad()
         }
     }
@@ -259,10 +262,10 @@ class MainActivity : AppCompatActivity() {
      * Configura el FAB para hacer scroll suave hacia el pronóstico horario.
      */
     private fun configurarBotonScrollAbajo() {
-        vinculacion.mainButtonScrollDown.setOnClickListener {
+        binding.mainButtonScrollDown.setOnClickListener {
             // Hacer scroll hasta el título "PRONOSTICO HORARIO"
-            vinculacion.mainScrollView.post {
-                vinculacion.mainScrollView.smoothScrollTo(0, vinculacion.mainTitleHourly.top)
+            binding.mainScrollView.post {
+                binding.mainScrollView.smoothScrollTo(0, binding.mainTitleHourly.top)
             }
         }
     }

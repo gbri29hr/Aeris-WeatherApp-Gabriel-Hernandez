@@ -15,17 +15,17 @@ import androidx.room.PrimaryKey
     foreignKeys = [ForeignKey(
         entity = CiudadEntidad::class,
         parentColumns = ["id_ciudad"],
-        childColumns = ["id_ciudad_fk"],
+        childColumns = ["fk_id_ciudad"],
         onDelete = ForeignKey.CASCADE
     )],
-    indices = [Index(value = ["id_ciudad_fk"])]
+    indices = [Index(value = ["fk_id_ciudad"])]
 )
 data class PrediccionHorasEntidad(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_hora")
     val idHora: Int = 0,
 
-    @ColumnInfo(name = "id_ciudad_fk")
+    @ColumnInfo(name = "fk_id_ciudad")
     val idCiudadFk: Int,
 
     @ColumnInfo(name = "hora")

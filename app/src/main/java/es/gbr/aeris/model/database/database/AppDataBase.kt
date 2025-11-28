@@ -20,7 +20,7 @@ import kotlin.math.sin
         PrediccionHorasEntidad::class,
         PrediccionDiariaEntidad::class
     ],
-    version = 6,
+    version = 1,
     exportSchema = false
 )
 abstract class AppDataBase : RoomDatabase() {
@@ -37,7 +37,6 @@ abstract class AppDataBase : RoomDatabase() {
                     AppDataBase::class.java,
                     "weather_app.db"
                 )
-                    .fallbackToDestructiveMigration() // Permite recrear la BD si cambia la versión
                     .addCallback(DatabaseCallback()) // Callback para poblar datos iniciales
                     .build()
                 INSTANCE = instance

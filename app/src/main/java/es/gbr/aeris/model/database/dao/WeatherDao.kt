@@ -21,14 +21,14 @@ interface WeatherDao {
     fun obtenerTodasLasCiudades(): LiveData<List<CiudadEntidad>>
 
 
-    @Query("SELECT * FROM tiempo_actual WHERE id_ciudad_fk = :idCiudad")
+    @Query("SELECT * FROM tiempo_actual WHERE fk_id_ciudad = :idCiudad")
     fun obtenerTiempoActual(idCiudad: Int): LiveData<TiempoActualEntidad>
 
 
-    @Query("SELECT * FROM prediccion_hora WHERE id_ciudad_fk = :idCiudad ORDER BY id_hora ASC")
+    @Query("SELECT * FROM prediccion_hora WHERE fk_id_ciudad = :idCiudad ORDER BY id_hora ASC")
     fun obtenerPrediccionHoras(idCiudad: Int): LiveData<List<PrediccionHorasEntidad>>
 
-    @Query("SELECT * FROM prediccion_dia WHERE id_ciudad_fk = :idCiudad ORDER BY id_dia ASC")
+    @Query("SELECT * FROM prediccion_dia WHERE fk_id_ciudad = :idCiudad ORDER BY id_dia ASC")
     fun obtenerPrediccionDiaria(idCiudad: Int): LiveData<List<PrediccionDiariaEntidad>>
 
 
