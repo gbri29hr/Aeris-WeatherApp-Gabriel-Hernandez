@@ -33,6 +33,9 @@
     <string name="ajustes_velocidad_viento">Velocidad del Viento</string>
     <string name="ajustes_escoge_opcion">Escoge una opcion:</string>
     <string name="ajustes_tema_app">Tema de la App</string>
+    <string name="ajustes_tema_titulo">Tema</string>
+    <string name="ajustes_claro">Claro</string>
+    <string name="ajustes_oscuro">Oscuro</string>
     <string name="ajustes_modo_oscuro">Modo oscuro</string>
     <string name="ajustes_tema_light">Light</string>
     <string name="ajustes_tema_dark">Dark</string>
@@ -79,5 +82,10 @@
     <string name="desc_lluvia">Icono Precipitación</string>
 
     <string name="mapa_titulo">Ubicación en el Mapa</string>
+
+    <!-- Navegación inferior -->
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_localizaciones">Ubicaciones</string>
+    <string name="nav_ajustes">Ajustes</string>
 
 </resources>

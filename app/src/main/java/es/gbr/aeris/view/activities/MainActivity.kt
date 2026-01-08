@@ -1,307 +1,433 @@
 package es.gbr.aeris.view.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import es.gbr.aeris.R
-import es.gbr.aeris.databinding.ActivityMainBinding
 import es.gbr.aeris.model.DatosCompartidos
+import es.gbr.aeris.model.database.entities.CiudadEntidad
+import es.gbr.aeris.model.database.entities.PrediccionDiariaEntidad
+import es.gbr.aeris.model.database.entities.PrediccionHorasEntidad
 import es.gbr.aeris.model.database.entities.TiempoActualEntidad
-import es.gbr.aeris.view.adapters.PrediccionDiasAdapter
-import es.gbr.aeris.view.adapters.PrediccionHorasAdapter
+import es.gbr.aeris.ui.components.ElementoPrediccionDias
+import es.gbr.aeris.ui.components.ElementoPrediccionHoras
+import es.gbr.aeris.ui.components.TarjetaDetalleClima
+import es.gbr.aeris.ui.theme.AerisTheme
 import es.gbr.aeris.viewmodel.MainViewModel
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/**
- * Activity principal de la aplicación que muestra el clima actual y los pronósticos.
- *
- *
- * Arquitectura MVVM: Esta Activity observa cambios en el ViewModel mediante LiveData
- * y actualiza la UI automáticamente cuando los datos cambian.
- */
-class MainActivity : AppCompatActivity() {
 
-    // ViewBinding para acceso seguro a las vistas del layout
-    private lateinit var binding: ActivityMainBinding
+class MainActivity : ComponentActivity() {
 
-    // ViewModel que gestiona los datos del clima (arquitectura MVVM)
     private val modeloVista: MainViewModel by viewModels()
 
-    // Adaptadores para los RecyclerViews de pronósticos
-    lateinit var adaptadorHoras: PrediccionHorasAdapter
-    lateinit var adaptadorDias: PrediccionDiasAdapter
-
-
-    // Preferencias del usuario recibidas mediante Bundle desde otras Activities
-    private var usarFahrenheit: Boolean = false  // true = Fahrenheit, false = Celsius
-    private var usarMph: Boolean = false  // true = MPH, false = Km/h
-    private var temaOscuro: Boolean = false  // true = Oscuro, false = Claro
+    private var usarFahrenheit: Boolean = false
+    private var usarMph: Boolean = false
+    private var temaOscuro: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
-        // Recuperar preferencias del usuario desde el Bundle (Intent)
-        // Estas preferencias vienen de InicioActivity o AjustesActivity
         intent.extras?.let {
             usarFahrenheit = it.getBoolean("usarFahrenheit", false)
             usarMph = it.getBoolean("usarMph", false)
             temaOscuro = it.getBoolean("temaOscuro", false)
         }
 
-        // Inicializar ViewBinding para acceso a las vistas
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // Establecer la ciudad seleccionada en el ViewModel desde datos compartidos
         modeloVista.cambiarCiudadSeleccionada(DatosCompartidos.idCiudadSeleccionada)
 
-        // Configurar componentes de la interfaz
-        configurarRecyclerViews()
-        observarDatos()
-        configurarBotonSeleccionCiudad()
-        configurarBotonScrollAbajo()
-
-        // Marcar la opción "Inicio" como seleccionada en el menú de navegación
-        binding.bottomNavigation.selectedItemId = R.id.nav_home
-
-        // Configurar listeners para el menú de navegación inferior
-        binding.bottomNavigation.setOnItemSelectedListener { elemento ->
-            when (elemento.itemId) {
-                R.id.nav_home -> {
-                    // Ya estamos en Home, no hacer nada
-                    true
-                }
-                R.id.nav_localizaciones -> {
-                    // Ir a LocalizacionesActivity pasando las preferencias mediante Bundle
-                    val intencion = Intent(this, LocalizacionesActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putBoolean("usarFahrenheit", usarFahrenheit)
-                    bundle.putBoolean("usarMph", usarMph)
-                    bundle.putBoolean("temaOscuro", temaOscuro)
-                    intencion.putExtras(bundle)
-                    startActivity(intencion)
-                    finish()  // Finalizar esta Activity para evitar acumulación en el stack
-                    true
-                }
-                R.id.nav_settings -> {
-                    // Ir a AjustesActivity pasando las preferencias mediante Bundle
-                    val intencion = Intent(this, AjustesActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putBoolean("usarFahrenheit", usarFahrenheit)
-                    bundle.putBoolean("usarMph", usarMph)
-                    bundle.putBoolean("temaOscuro", temaOscuro)
-                    intencion.putExtras(bundle)
-                    startActivity(intencion)
-                    finish()  // Finalizar esta Activity para evitar acumulación en el stack
-                    true
-                }
-                else -> false
+        setContent {
+            AerisTheme(darkTheme = temaOscuro) {
+                PantallaPrincipal(
+                    modeloVista = modeloVista,
+                    usarFahrenheit = usarFahrenheit,
+                    usarMph = usarMph,
+                    temaOscuro = temaOscuro,
+                    alNavegarALocalizaciones = {
+                        val intencion = Intent(this, LocalizacionesActivity::class.java)
+                        val bundle = Bundle()
+                        bundle.putBoolean("usarFahrenheit", usarFahrenheit)
+                        bundle.putBoolean("usarMph", usarMph)
+                        bundle.putBoolean("temaOscuro", temaOscuro)
+                        intencion.putExtras(bundle)
+                        startActivity(intencion)
+                        finish()
+                    },
+                    alNavegarAAjustes = {
+                        val intencion = Intent(this, AjustesActivity::class.java)
+                        val bundle = Bundle()
+                        bundle.putBoolean("usarFahrenheit", usarFahrenheit)
+                        bundle.putBoolean("usarMph", usarMph)
+                        bundle.putBoolean("temaOscuro", temaOscuro)
+                        intencion.putExtras(bundle)
+                        startActivity(intencion)
+                        finish()
+                    }
+                )
             }
         }
-    }
-
-    /**
-     * Configura los RecyclerViews para mostrar pronósticos horarios y diarios.
-     * Utiliza Layout horizontal y vertical.
-     */
-    private fun configurarRecyclerViews() {
-        adaptadorHoras = PrediccionHorasAdapter(usarFahrenheit = usarFahrenheit)
-        binding.mainRecyclerHourly.apply {
-            layoutManager =
-                LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
-            adapter = adaptadorHoras
-        }
-
-        adaptadorDias = PrediccionDiasAdapter(usarFahrenheit = usarFahrenheit)
-        binding.mainRecyclerDaily.apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = adaptadorDias
-        }
-    }
-
-    /**
-     * Observa cambios en los datos del ViewModel mediante LiveData.
-     * Actualiza automáticamente cuando los datos cambian.
-     */
-    private fun observarDatos() {
-        modeloVista.tiempoActual.observe(this) { tiempo ->
-            if (tiempo != null) {
-                actualizarVistaPrincipal(tiempo)
-            }
-        }
-
-        modeloVista.prediccionHoras.observe(this) { listaHoras ->
-            adaptadorHoras.actualizarDatos(listaHoras)
-        }
-
-        modeloVista.prediccionDiaria.observe(this) { listaDias ->
-            adaptadorDias.actualizarDatos(listaDias)
-        }
-
-
-        modeloVista.idCiudadSeleccionada.observe(this) { idSeleccionado ->
-            modeloVista.todasLasCiudades.value?.let { ciudades ->
-                val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
-                if (ciudadActual != null) {
-                    binding.mainTextCity.text = ciudadActual.nombre
-                }
-            }
-        }
-
-
-        modeloVista.todasLasCiudades.observe(this) { ciudades ->
-            modeloVista.idCiudadSeleccionada.value?.let { idSeleccionado ->
-                val ciudadActual = ciudades.find { it.idCiudad == idSeleccionado }
-                if (ciudadActual != null) {
-                    binding.mainTextCity.text = ciudadActual.nombre
-                }
-            }
-        }
-    }
-
-    /**
-     * Actualiza todos los elementos de la vista principal con los datos del clima.
-     * Realiza conversiones de unidades según las preferencias del usuario.
-     *
-     * @param tiempo Entidad con los datos del tiempo actual de la base de datos
-     */
-    private fun actualizarVistaPrincipal(tiempo: TiempoActualEntidad) {
-        // Convertir temperaturas según preferencia del usuario
-        val temperatura = if (usarFahrenheit) celsiusAFahrenheit(tiempo.temperatura) else tiempo.temperatura
-        val maxima = if (usarFahrenheit) celsiusAFahrenheit(tiempo.tempAlta) else tiempo.tempAlta
-        val minima = if (usarFahrenheit) celsiusAFahrenheit(tiempo.tempBaja) else tiempo.tempBaja
-
-        // Convertir velocidad del viento según preferencia del usuario
-        val viento = if (usarMph) kphAMph(tiempo.vientoVelocidad) else tiempo.vientoVelocidad
-        val unidadViento = if (usarMph) "mph" else "km/h"
-
-        // Actualizar textos principales del clima
-        binding.mainTextTemperature.text = "${temperatura.toInt()}°"
-        binding.mainTextDescription.text = DatosCompartidos.traducirDescripcion(this, tiempo.descripcion)
-        binding.mainTextMin.text = "MIN: ${minima.toInt()}°"
-        binding.mainTextMax.text = "MAX: ${maxima.toInt()}°"
-
-        // Muestra la fecha actual con formato localizado según idioma del sistema
-        val formateadorFecha = SimpleDateFormat("EEEE, MMM dd, HH:mm", Locale.getDefault())
-        binding.mainTextDate.text = formateadorFecha.format(Date())
-
-        // Actualizar cards con detalles del clima
-        binding.detailHumedad.text = "${tiempo.humedad.toInt()}%"
-        binding.detailViento.text = "${viento.toInt()} $unidadViento"
-        binding.detailUv.text = "${tiempo.uvIndice.toInt()} (${obtenerNivelUV(tiempo.uvIndice.toInt())})"
-        binding.detailPrecipitacion.text = "${tiempo.precipitacion}%"
-
-        // Cargar y mostrar el icono del clima correspondiente
-        cargarIconoClima(tiempo.codigoIcono)
-    }
-
-    /**
-     * Carga el icono del clima según el código recibido de la base de datos.
-     *
-     * @param codigoIcono Nombre del drawable del icono (ej: "ic_sol", "ic_lluvia")
-     */
-    private fun cargarIconoClima(codigoIcono: String) {
-        val idRecurso = when(codigoIcono) {
-            "ic_sol" -> R.drawable.ic_sol
-            "ic_lluvia" -> R.drawable.ic_lluvia
-            "ic_nieve" -> R.drawable.ic_nieve
-            "ic_nublado" -> R.drawable.ic_nublado
-            "ic_parcialmente_nublado" -> R.drawable.ic_parcialmente_nublado
-            "ic_tormenta" -> R.drawable.ic_tormenta
-            else -> {
-                val id = resources.getIdentifier(codigoIcono, "drawable", packageName)
-                if (id != 0) id else R.drawable.ic_sol
-            }
-        }
-        binding.mainImageWeather.setImageResource(idRecurso)
-    }
-
-    /**
-     * Determina el nivel de riesgo del índice UV según estándares internacionales.
-     *
-     * @param indice Valor numérico del índice UV
-     * @return String localizado: "Bajo", "Medio" o "Alto"
-     */
-    private fun obtenerNivelUV(indice: Int): String {
-        return when {
-            indice <= 2 -> getString(R.string.main_bajo)
-            indice <= 5 -> getString(R.string.main_medio)
-            else -> getString(R.string.main_alto)
-        }
-    }
-
-    /**
-     * Convierte temperatura de Celsius a Fahrenheit.
-     * Fórmula: F = (C × 9/5) + 32
-     */
-    private fun celsiusAFahrenheit(celsius: Double): Double = (celsius * 9/5) + 32
-
-    /**
-     * Convierte velocidad de km/h a millas por hora.
-     * Factor: 1 mph = 1.609 km/h
-     */
-    private fun kphAMph(kph: Double): Double = kph / 1.609
-
-    /**
-     * Configura el botón para mostrar el diálogo de selección de ciudad.
-     */
-    private fun configurarBotonSeleccionCiudad() {
-        binding.mainButtonSelectCity.setOnClickListener {
-            mostrarDialogoSeleccionCiudad()
-        }
-    }
-
-    /**
-     * Configura el FAB para hacer scroll suave hacia el pronóstico horario.
-     */
-    private fun configurarBotonScrollAbajo() {
-        binding.mainButtonScrollDown.setOnClickListener {
-            // Hacer scroll hasta el título "PRONOSTICO HORARIO"
-            binding.mainScrollView.post {
-                binding.mainScrollView.smoothScrollTo(0, binding.mainTitleHourly.top)
-            }
-        }
-    }
-
-    /**
-     * Muestra un AlertDialog con todas las ciudades disponibles.
-     * Al seleccionar una ciudad, actualiza automáticamente todos los datos.
-     */
-    private fun mostrarDialogoSeleccionCiudad() {
-        modeloVista.todasLasCiudades.value?.let { ciudades ->
-            if (ciudades.isEmpty()) {
-                return
-            }
-
-            val nombresCiudades = ciudades.map { it.nombre }.toTypedArray()
-            val idActual = modeloVista.tiempoActual.value?.idCiudadFk ?: 1
-            val posicionActual = ciudades.indexOfFirst { it.idCiudad == idActual }
-
-            AlertDialog.Builder(this)
-                .setTitle(R.string.main_seleccionar_ciudad_titulo)
-                .setSingleChoiceItems(nombresCiudades, posicionActual) { dialogo, posicion ->
-                    val ciudadSeleccionada = ciudades[posicion]
-                    modeloVista.cambiarCiudadSeleccionada(ciudadSeleccionada.idCiudad)
-                    dialogo.dismiss()
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
-        }
-    }
-
-
-     // Método del ciclo de vida. Refresca la vista cuando vuelve a primer plano.
-
-    override fun onResume() {
-        super.onResume()
-        // Recargar vista cuando volvemos a la activity
-        modeloVista.tiempoActual.value?.let { actualizarVistaPrincipal(it) }
     }
 }
+
+@Composable
+fun PantallaPrincipal(
+    modeloVista: MainViewModel,
+    usarFahrenheit: Boolean,
+    usarMph: Boolean,
+    temaOscuro: Boolean,
+    alNavegarALocalizaciones: () -> Unit,
+    alNavegarAAjustes: () -> Unit
+) {
+    val tiempoActual by modeloVista.tiempoActual.observeAsState()
+    val prediccionHoras by modeloVista.prediccionHoras.observeAsState(emptyList())
+    val prediccionDiaria by modeloVista.prediccionDiaria.observeAsState(emptyList())
+    val todasLasCiudades by modeloVista.todasLasCiudades.observeAsState(emptyList())
+    val idCiudadSeleccionada by modeloVista.idCiudadSeleccionada.observeAsState(1)
+    
+    var mostrarDialogoCiudad by remember { mutableStateOf(false) }
+    
+    val ciudadActual = todasLasCiudades.find { it.idCiudad == idCiudadSeleccionada }
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    icon = { Icon(painterResource(R.drawable.ic_home), contentDescription = null) },
+                    label = { Text(stringResource(R.string.nav_inicio)) },
+                    selected = true,
+                    onClick = { }
+                )
+                NavigationBarItem(
+                    icon = { Icon(painterResource(R.drawable.ic_localizacion), contentDescription = null) },
+                    label = { Text(stringResource(R.string.nav_localizaciones)) },
+                    selected = false,
+                    onClick = alNavegarALocalizaciones
+                )
+                NavigationBarItem(
+                    icon = { Icon(painterResource(R.drawable.ic_ajustes), contentDescription = null) },
+                    label = { Text(stringResource(R.string.nav_ajustes)) },
+                    selected = false,
+                    onClick = alNavegarAAjustes
+                )
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+        ) {
+            tiempoActual?.let { tiempo ->
+                ContenidoClimaPrincipal(
+                    tiempo = tiempo,
+                    nombreCiudad = ciudadActual?.nombre ?: "",
+                    prediccionHoras = prediccionHoras,
+                    prediccionDiaria = prediccionDiaria,
+                    usarFahrenheit = usarFahrenheit,
+                    usarMph = usarMph,
+                    alSeleccionarCiudad = { mostrarDialogoCiudad = true }
+                )
+            }
+        }
+    }
+    
+    if (mostrarDialogoCiudad && todasLasCiudades.isNotEmpty()) {
+        DialogoSeleccionCiudad(
+            ciudades = todasLasCiudades,
+            idCiudadSeleccionada = idCiudadSeleccionada,
+            alSeleccionarCiudad = { ciudad ->
+                modeloVista.cambiarCiudadSeleccionada(ciudad.idCiudad)
+                mostrarDialogoCiudad = false
+            },
+            alCerrar = { mostrarDialogoCiudad = false }
+        )
+    }
+}
+
+@Composable
+fun ContenidoClimaPrincipal(
+    tiempo: TiempoActualEntidad,
+    nombreCiudad: String,
+    prediccionHoras: List<PrediccionHorasEntidad>,
+    prediccionDiaria: List<PrediccionDiariaEntidad>,
+    usarFahrenheit: Boolean,
+    usarMph: Boolean,
+    alSeleccionarCiudad: () -> Unit
+) {
+    val contexto = LocalContext.current
+    
+    val temperatura = if (usarFahrenheit) celsiusAFahrenheit(tiempo.temperatura) else tiempo.temperatura
+    val maxima = if (usarFahrenheit) celsiusAFahrenheit(tiempo.tempAlta) else tiempo.tempAlta
+    val minima = if (usarFahrenheit) celsiusAFahrenheit(tiempo.tempBaja) else tiempo.tempBaja
+    val viento = if (usarMph) kphAMph(tiempo.vientoVelocidad) else tiempo.vientoVelocidad
+    val unidadViento = if (usarMph) "mph" else "km/h"
+    
+    val formateadorFecha = SimpleDateFormat("EEEE, MMM dd, HH:mm", Locale.getDefault())
+    val fechaActual = formateadorFecha.format(Date())
+    
+    // Cabecera con ciudad y selector
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = nombreCiudad,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = alSeleccionarCiudad) {
+            Icon(
+                painter = painterResource(R.drawable.ic_ubicacion),
+                contentDescription = stringResource(R.string.main_seleccionar_ciudad),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+    
+    Text(
+        text = fechaActual,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 24.dp)
+    )
+    
+    // Información principal del clima
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painter = painterResource(obtenerIconoClima(tiempo.codigoIcono)),
+            contentDescription = stringResource(R.string.desc_icono_clima),
+            modifier = Modifier.size(160.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Text(
+            text = "${temperatura.toInt()}°",
+            fontSize = 96.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Text(
+            text = DatosCompartidos.traducirDescripcion(contexto, tiempo.descripcion),
+            style = MaterialTheme.typography.bodyLarge,
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+    
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+        color = MaterialTheme.colorScheme.outlineVariant
+    )
+    
+    // Temperaturas máxima y mínima
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "MIN: ${minima.toInt()}°",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = "MAX: ${maxima.toInt()}°",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+    
+    // Detalles del clima
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        TarjetaDetalleClima(
+            iconoRes = R.drawable.ic_humedad,
+            titulo = stringResource(R.string.main_humedad),
+            valor = "${tiempo.humedad.toInt()}%",
+            modificador = Modifier.weight(1f)
+        )
+        TarjetaDetalleClima(
+            iconoRes = R.drawable.ic_viento_velocidad,
+            titulo = stringResource(R.string.main_viento),
+            valor = "${viento.toInt()} $unidadViento",
+            modificador = Modifier.weight(1f)
+        )
+        TarjetaDetalleClima(
+            iconoRes = R.drawable.ic_uv,
+            titulo = stringResource(R.string.main_indice_uv),
+            valor = "${tiempo.uvIndice.toInt()} (${obtenerNivelUV(contexto, tiempo.uvIndice.toInt())})",
+            modificador = Modifier.weight(1f)
+        )
+        TarjetaDetalleClima(
+            iconoRes = R.drawable.ic_lluvia,
+            titulo = stringResource(R.string.main_precipitacion),
+            valor = "${tiempo.precipitacion}%",
+            modificador = Modifier.weight(1f)
+        )
+    }
+    
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+        color = MaterialTheme.colorScheme.outlineVariant
+    )
+    
+    // Pronóstico por horas
+    Text(
+        text = stringResource(R.string.main_pronostico_horario),
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+    )
+    
+    val horaActual = SimpleDateFormat("HH", Locale.getDefault()).format(Date())
+    
+    LazyRow(
+        modifier = Modifier.padding(vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(prediccionHoras) { prediccion ->
+            val esHoraActual = prediccion.hora == horaActual || prediccion.hora == "${horaActual}:00"
+            ElementoPrediccionHoras(
+                prediccion = prediccion,
+                usarFahrenheit = usarFahrenheit,
+                esHoraActual = esHoraActual,
+                iconoRes = obtenerIconoClima(prediccion.codigoIcono)
+            )
+        }
+    }
+    
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+        color = MaterialTheme.colorScheme.outlineVariant
+    )
+    
+    // Pronóstico por días
+    Text(
+        text = stringResource(R.string.main_pronostico_diario),
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+    )
+    
+    prediccionDiaria.forEachIndexed { indice, prediccion ->
+        val calendario = Calendar.getInstance()
+        calendario.add(Calendar.DAY_OF_YEAR, indice + 2)
+        val formatoDia = SimpleDateFormat("EEEE", Locale.getDefault())
+        val diaSiguiente = formatoDia.format(calendario.time).replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+        }
+        
+        ElementoPrediccionDias(
+            prediccion = prediccion,
+            diaTraducido = DatosCompartidos.traducirDia(contexto, prediccion.nombreDia),
+            diaSiguiente = diaSiguiente,
+            usarFahrenheit = usarFahrenheit,
+            iconoRes = obtenerIconoClima(prediccion.codigoIcono)
+        )
+    }
+    
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+fun DialogoSeleccionCiudad(
+    ciudades: List<CiudadEntidad>,
+    idCiudadSeleccionada: Int,
+    alSeleccionarCiudad: (CiudadEntidad) -> Unit,
+    alCerrar: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = alCerrar,
+        title = { Text(stringResource(R.string.main_seleccionar_ciudad_titulo)) },
+        text = {
+            Column {
+                ciudades.forEach { ciudad ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = ciudad.idCiudad == idCiudadSeleccionada,
+                            onClick = { alSeleccionarCiudad(ciudad) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = ciudad.nombre)
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = alCerrar) {
+                Text(stringResource(android.R.string.cancel))
+            }
+        }
+    )
+}
+
+private fun obtenerIconoClima(codigoIcono: String): Int {
+    return when(codigoIcono) {
+        "ic_sol" -> R.drawable.ic_sol
+        "ic_lluvia" -> R.drawable.ic_lluvia
+        "ic_nieve" -> R.drawable.ic_nieve
+        "ic_nublado" -> R.drawable.ic_nublado
+        "ic_parcialmente_nublado" -> R.drawable.ic_parcialmente_nublado
+        "ic_tormenta" -> R.drawable.ic_tormenta
+        else -> R.drawable.ic_sol
+    }
+}
+
+private fun obtenerNivelUV(contexto: android.content.Context, indice: Int): String {
+    return when {
+        indice <= 2 -> contexto.getString(R.string.main_bajo)
+        indice <= 5 -> contexto.getString(R.string.main_medio)
+        else -> contexto.getString(R.string.main_alto)
+    }
+}
+
+private fun celsiusAFahrenheit(celsius: Double): Double = (celsius * 9/5) + 32
+
+private fun kphAMph(kph: Double): Double = kph / 1.609

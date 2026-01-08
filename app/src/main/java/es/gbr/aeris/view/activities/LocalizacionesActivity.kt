@@ -1,28 +1,40 @@
 package es.gbr.aeris.view.activities
 
-import es.gbr.aeris.R
-import es.gbr.aeris.databinding.ActivityLocalizacionesBinding
-import es.gbr.aeris.model.database.entities.CiudadEntidad
-import es.gbr.aeris.view.adapters.LocalizacionAdapter
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import es.gbr.aeris.R
 import es.gbr.aeris.model.DatosCompartidos
+import es.gbr.aeris.model.database.entities.CiudadEntidad
+import es.gbr.aeris.model.database.relations.CiudadConTiempoActual
+import es.gbr.aeris.ui.theme.AerisTheme
 import es.gbr.aeris.viewmodel.LocalizacionesViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-// Gestiona la lista de ciudades guardadas
-class LocalizacionesActivity : AppCompatActivity() {
 
-    private lateinit var vinculacion: ActivityLocalizacionesBinding
+class LocalizacionesActivity : ComponentActivity() {
+
     private val modeloVista: LocalizacionesViewModel by viewModels()
-    private lateinit var adaptadorLocalizacion: LocalizacionAdapter
-    
+
     private var usarFahrenheit: Boolean = false
     private var usarMph: Boolean = false
     private var temaOscuro: Boolean = false
@@ -30,282 +42,477 @@ class LocalizacionesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        vinculacion = ActivityLocalizacionesBinding.inflate(layoutInflater)
-        setContentView(vinculacion.root)
-
         intent.extras?.let {
             usarFahrenheit = it.getBoolean("usarFahrenheit", false)
             usarMph = it.getBoolean("usarMph", false)
             temaOscuro = it.getBoolean("temaOscuro", false)
         }
 
-        configurarNavegacionInferior()
-        configurarRecyclerView()
-        configurarBusqueda()
-        configurarBotonAnadir()
-        configurarBotonEliminar()
-        configurarBotonUbicacionActual()
-        observarDatos()
-    }
-    
-    override fun onResume() {
-        super.onResume()
-        adaptadorLocalizacion.actualizarCiudadPrincipal(DatosCompartidos.idCiudadSeleccionada)
-    }
-
-    private fun configurarBotonAnadir() {
-        vinculacion.btnAddLocation.setOnClickListener {
-            mostrarDialogoAnadirCiudad()
-        }
-    }
-    
-    private fun mostrarDialogoAnadirCiudad() {
-        modeloVista.todasLasCiudadesDB.value?.let { todasLasCiudades ->
-            if (todasLasCiudades.isEmpty()) {
-                Toast.makeText(this, R.string.ubicaciones_cargando, Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val ciudadesOcultas = obtenerCiudadesOcultas()
-            
-            val nombresCiudades = todasLasCiudades.map {
-                val estaOculta = ciudadesOcultas.contains(it.ciudad.idCiudad)
-                if (estaOculta) {
-                    it.ciudad.nombre
-                } else {
-                    "${it.ciudad.nombre} ✓"
-                }
-            }.toTypedArray()
-
-            AlertDialog.Builder(this)
-                .setTitle(R.string.ubicaciones_seleccionar_titulo)
-                .setItems(nombresCiudades) { _, posicion ->
-                    val ciudadSeleccionada = todasLasCiudades[posicion].ciudad
-                    val estaOculta = ciudadesOcultas.contains(ciudadSeleccionada.idCiudad)
-                    
-                    if (estaOculta) {
-                        mostrarDialogoConfirmarAnadir(ciudadSeleccionada)
-                    } else {
-                        Toast.makeText(this, "${ciudadSeleccionada.nombre} ${getString(R.string.ubicaciones_ya_visible)}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton(R.string.btn_cancelar, null)
-                .show()
-        } ?: run {
-            Toast.makeText(this, R.string.ubicaciones_cargando, Toast.LENGTH_SHORT).show()
-        }
-    }
-    
-    // Confirma antes de añadir una ciudad
-    private fun mostrarDialogoConfirmarAnadir(ciudad: CiudadEntidad) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.ubicaciones_anadir_titulo)
-            .setMessage(getString(R.string.ubicaciones_anadir_mensaje, ciudad.nombre))
-            .setPositiveButton(R.string.ubicaciones_anadir_btn) { _, _ ->
-                mostrarCiudad(ciudad.idCiudad)
-                Toast.makeText(this, getString(R.string.ubicaciones_ciudad_anadida, ciudad.nombre), Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton(R.string.btn_cancelar, null)
-            .show()
-    }
-    
-    private fun obtenerCiudadesOcultas(): Set<Int> {
-        return DatosCompartidos.obtenerCiudadesOcultas()
-    }
-    
-    // Oculta una ciudad de la lista
-    private fun ocultarCiudad(idCiudad: Int) {
-        DatosCompartidos.ocultarCiudad(idCiudad)
-        modeloVista.actualizarCiudadesOcultas(obtenerCiudadesOcultas())
-    }
-    
-    // Hace visible una ciudad oculta
-    private fun mostrarCiudad(idCiudad: Int) {
-        DatosCompartidos.mostrarCiudad(idCiudad)
-        modeloVista.actualizarCiudadesOcultas(obtenerCiudadesOcultas())
-    }
-
-    // Configurar botón de ubicación actual
-    private fun configurarBotonUbicacionActual() {
-        vinculacion.cardUsarUbicacion.setOnClickListener {
-            Toast.makeText(this, "Disponible próximamente", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // Configurar botón de eliminar múltiples ciudades
-    private fun configurarBotonEliminar() {
-        vinculacion.btnDeleteMode.setOnClickListener {
-            adaptadorLocalizacion.activarModoEliminacion()
-            Toast.makeText(this, R.string.ubicaciones_seleccionar_para_eliminar, Toast.LENGTH_SHORT).show()
-            
-            // Cambiar el botón a modo confirmación
-            vinculacion.btnDeleteMode.setImageResource(android.R.drawable.ic_menu_delete)
-            vinculacion.btnDeleteMode.setOnClickListener {
-                if (adaptadorLocalizacion.haySeleccionadas()) {
-                    mostrarDialogoEliminarMultiple()
-                } else {
-                    Toast.makeText(this, R.string.ubicaciones_no_seleccionadas, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-    
-    // Cancela el modo de eliminación
-    private fun configurarBotonCancelar() {
-        adaptadorLocalizacion.desactivarModoEliminacion()
-        vinculacion.btnDeleteMode.setImageResource(R.drawable.ic_eliminar)
-        configurarBotonEliminar()
-    }
-
-    // Configurar la navegación inferior
-    private fun configurarNavegacionInferior() {
-        vinculacion.bottomNavigation.selectedItemId = R.id.nav_localizaciones
-
-        vinculacion.bottomNavigation.setOnItemSelectedListener { elemento ->
-            when (elemento.itemId) {
-                R.id.nav_home -> {
-                    val intencion = Intent(this, MainActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putBoolean("usarFahrenheit", usarFahrenheit)
-                    bundle.putBoolean("usarMph", usarMph)
-                    bundle.putBoolean("temaOscuro", temaOscuro)
-                    intencion.putExtras(bundle)
-                    startActivity(intencion)
-                    finish()
-                    true
-                }
-                R.id.nav_localizaciones -> true
-                R.id.nav_settings -> {
-                    val intencion = Intent(this, AjustesActivity::class.java)
-                    val bundle = Bundle()
-                    bundle.putBoolean("usarFahrenheit", usarFahrenheit)
-                    bundle.putBoolean("usarMph", usarMph)
-                    bundle.putBoolean("temaOscuro", temaOscuro)
-                    intencion.putExtras(bundle)
-                    startActivity(intencion)
-                    finish()
-                    true
-                }
-                else -> false
-            }
-        }
-    }
-
-    // Configurar el RecyclerView de ciudades
-    private fun configurarRecyclerView() {
-        adaptadorLocalizacion = LocalizacionAdapter(
-            alHacerClicEnElemento = { ciudad ->
-                seleccionarCiudad(ciudad)
-            },
-            alHacerClicEnEliminar = { ciudad ->
-                mostrarDialogoEliminar(ciudad)
-            },
-            idCiudadPrincipal = DatosCompartidos.idCiudadSeleccionada,
-            usarFahrenheit = usarFahrenheit
-        )
-
-        vinculacion.locationsRecycler.layoutManager = LinearLayoutManager(this)
-        vinculacion.locationsRecycler.adapter = adaptadorLocalizacion
-    }
-
-    // Configurar el buscador de ciudades
-    private fun configurarBusqueda() {
-        vinculacion.locationsSearchBarEdittext.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                modeloVista.buscarCiudad(s.toString())
-            }
-        })
-    }
-
-    // Observar cambios en los datos para actualizar la lista
-    private fun observarDatos() {
         modeloVista.actualizarCiudadesOcultas(DatosCompartidos.obtenerCiudadesOcultas())
 
-        // Observar lista completa
-        modeloVista.todasLasCiudadesDB.observe(this) { todasLasCiudades ->
-            if (todasLasCiudades != null) {
-                modeloVista.actualizarListaFiltrada(todasLasCiudades)
-            }
-        }
-
-        // Observar lista filtrada
-        modeloVista.ciudadesFiltradas.observe(this) { listaCiudades ->
-            if (listaCiudades != null) {
-                adaptadorLocalizacion.actualizarDatos(listaCiudades)
-            } else {
-                adaptadorLocalizacion.actualizarDatos(emptyList())
+        setContent {
+            AerisTheme(darkTheme = temaOscuro) {
+                PantallaLocalizaciones(
+                    modeloVista = modeloVista,
+                    usarFahrenheit = usarFahrenheit,
+                    alNavegarAInicio = {
+                        val intencion = Intent(this, MainActivity::class.java)
+                        val bundle = Bundle()
+                        bundle.putBoolean("usarFahrenheit", usarFahrenheit)
+                        bundle.putBoolean("usarMph", usarMph)
+                        bundle.putBoolean("temaOscuro", temaOscuro)
+                        intencion.putExtras(bundle)
+                        startActivity(intencion)
+                        finish()
+                    },
+                    alNavegarAAjustes = {
+                        val intencion = Intent(this, AjustesActivity::class.java)
+                        val bundle = Bundle()
+                        bundle.putBoolean("usarFahrenheit", usarFahrenheit)
+                        bundle.putBoolean("usarMph", usarMph)
+                        bundle.putBoolean("temaOscuro", temaOscuro)
+                        intencion.putExtras(bundle)
+                        startActivity(intencion)
+                        finish()
+                    },
+                    alSeleccionarCiudad = { ciudad ->
+                        val intencion = Intent(this, MapaActivity::class.java)
+                        val bundle = Bundle()
+                        bundle.putDouble("latitud", ciudad.latitud)
+                        bundle.putDouble("longitud", ciudad.longitud)
+                        bundle.putString("nombreCiudad", ciudad.nombre)
+                        intencion.putExtras(bundle)
+                        startActivity(intencion)
+                    },
+                    alOcultarCiudad = { idCiudad ->
+                        DatosCompartidos.ocultarCiudad(idCiudad)
+                        modeloVista.actualizarCiudadesOcultas(DatosCompartidos.obtenerCiudadesOcultas())
+                    },
+                    alMostrarCiudad = { idCiudad ->
+                        DatosCompartidos.mostrarCiudad(idCiudad)
+                        modeloVista.actualizarCiudadesOcultas(DatosCompartidos.obtenerCiudadesOcultas())
+                    },
+                    alMostrarMensaje = { mensaje ->
+                        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
+                    }
+                )
             }
         }
     }
+}
 
-    /**
-     * Abre MapaActivity mostrando la información de ubicación de la ciudad seleccionada.
-     * Pasa datos mediante Bundle (latitud, longitud y nombre).
-     */
-    private fun seleccionarCiudad(ciudad: CiudadEntidad) {
-        val intencion = Intent(this, MapaActivity::class.java)
-        val bundle = Bundle()
-        bundle.putDouble("latitud", ciudad.latitud)
-        bundle.putDouble("longitud", ciudad.longitud)
-        bundle.putString("nombreCiudad", ciudad.nombre)
-        intencion.putExtras(bundle)
-        startActivity(intencion)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PantallaLocalizaciones(
+    modeloVista: LocalizacionesViewModel,
+    usarFahrenheit: Boolean,
+    alNavegarAInicio: () -> Unit,
+    alNavegarAAjustes: () -> Unit,
+    alSeleccionarCiudad: (CiudadEntidad) -> Unit,
+    alOcultarCiudad: (Int) -> Unit,
+    alMostrarCiudad: (Int) -> Unit,
+    alMostrarMensaje: (String) -> Unit
+) {
+    val todasLasCiudadesDB by modeloVista.todasLasCiudadesDB.observeAsState(emptyList())
+    val ciudadesFiltradas by modeloVista.ciudadesFiltradas.observeAsState(emptyList())
+    
+    var textoBusqueda by remember { mutableStateOf("") }
+    var modoEliminacion by remember { mutableStateOf(false) }
+    var ciudadesSeleccionadas by remember { mutableStateOf(setOf<Int>()) }
+    var mostrarDialogoAnadir by remember { mutableStateOf(false) }
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+    var ciudadAEliminar by remember { mutableStateOf<CiudadEntidad?>(null) }
+    var mostrarDialogoConfirmarAnadir by remember { mutableStateOf(false) }
+    var ciudadAAnadir by remember { mutableStateOf<CiudadEntidad?>(null) }
+    
+    val idCiudadPrincipal = DatosCompartidos.idCiudadSeleccionada
+    val ciudadesOcultas = DatosCompartidos.obtenerCiudadesOcultas()
+
+    LaunchedEffect(todasLasCiudadesDB) {
+        modeloVista.actualizarListaFiltrada(todasLasCiudadesDB)
     }
 
-    /**
-     * Muestra diálogo de confirmación para ocultar una sola ciudad.
-     * No permite eliminar la ciudad marcada como principal.
-     */
-    private fun mostrarDialogoEliminar(ciudad: CiudadEntidad) {
-        val idCiudadPrincipal = DatosCompartidos.idCiudadSeleccionada
+    LaunchedEffect(textoBusqueda) {
+        modeloVista.buscarCiudad(textoBusqueda)
+    }
 
-        if (ciudad.idCiudad == idCiudadPrincipal) {
-            Toast.makeText(this, R.string.ubicaciones_no_puede_eliminar_principal, Toast.LENGTH_SHORT).show()
-            return
-        }
-        
-        AlertDialog.Builder(this)
-            .setTitle(R.string.ubicaciones_dialogo_eliminar_titulo)
-            .setMessage("${getString(R.string.ubicaciones_dialogo_eliminar_mensaje)} ${ciudad.nombre}?")
-            .setPositiveButton(R.string.ubicaciones_eliminar) { _, _ ->
-                ocultarCiudad(ciudad.idCiudad)
-                Toast.makeText(this, getString(R.string.ubicaciones_ciudad_eliminada, ciudad.nombre), Toast.LENGTH_SHORT).show()
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.ubicaciones_titulo),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            )
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    icon = { Icon(painterResource(R.drawable.ic_home), contentDescription = null) },
+                    label = { Text(stringResource(R.string.nav_inicio)) },
+                    selected = false,
+                    onClick = alNavegarAInicio
+                )
+                NavigationBarItem(
+                    icon = { Icon(painterResource(R.drawable.ic_localizacion), contentDescription = null) },
+                    label = { Text(stringResource(R.string.nav_localizaciones)) },
+                    selected = true,
+                    onClick = { }
+                )
+                NavigationBarItem(
+                    icon = { Icon(painterResource(R.drawable.ic_ajustes), contentDescription = null) },
+                    label = { Text(stringResource(R.string.nav_ajustes)) },
+                    selected = false,
+                    onClick = alNavegarAAjustes
+                )
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+        ) {
+            // Barra de búsqueda y botones
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = textoBusqueda,
+                    onValueChange = { textoBusqueda = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text(stringResource(R.string.ubicaciones_buscar_ciudad)) },
+                    leadingIcon = {
+                        Icon(painterResource(R.drawable.ic_buscar), contentDescription = null)
+                    },
+                    singleLine = true
+                )
+                
+                IconButton(onClick = { mostrarDialogoAnadir = true }) {
+                    Icon(
+                        painterResource(R.drawable.ic_anadir),
+                        contentDescription = stringResource(R.string.ubicaciones_anadir),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                IconButton(
+                    onClick = {
+                        if (modoEliminacion) {
+                            if (ciudadesSeleccionadas.isNotEmpty()) {
+                                mostrarDialogoEliminar = true
+                            } else {
+                                modoEliminacion = false
+                            }
+                        } else {
+                            modoEliminacion = true
+                        }
+                    }
+                ) {
+                    Icon(
+                        painterResource(R.drawable.ic_eliminar),
+                        contentDescription = stringResource(R.string.ubicaciones_eliminar),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = stringResource(R.string.ubicaciones_gestionar),
+                style = MaterialTheme.typography.titleLarge
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Card usar ubicación actual
+            OutlinedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { alMostrarMensaje("Disponible próximamente") }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painterResource(R.drawable.ic_ubicacion),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = stringResource(R.string.ubicaciones_usar_actual),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Lista de ciudades
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(ciudadesFiltradas) { ciudadConTiempo ->
+                    ElementoLocalizacion(
+                        ciudadConTiempo = ciudadConTiempo,
+                        esCiudadPrincipal = ciudadConTiempo.ciudad.idCiudad == idCiudadPrincipal,
+                        usarFahrenheit = usarFahrenheit,
+                        modoEliminacion = modoEliminacion,
+                        estaSeleccionada = ciudadesSeleccionadas.contains(ciudadConTiempo.ciudad.idCiudad),
+                        alCambiarSeleccion = { seleccionada ->
+                            ciudadesSeleccionadas = if (seleccionada) {
+                                ciudadesSeleccionadas + ciudadConTiempo.ciudad.idCiudad
+                            } else {
+                                ciudadesSeleccionadas - ciudadConTiempo.ciudad.idCiudad
+                            }
+                        },
+                        alPulsar = { alSeleccionarCiudad(ciudadConTiempo.ciudad) },
+                        alEliminar = {
+                            ciudadAEliminar = ciudadConTiempo.ciudad
+                            mostrarDialogoEliminar = true
+                        }
+                    )
+                }
+            }
+        }
     }
     
-    /**
-     * Muestra diálogo de confirmación para ocultar múltiples ciudades seleccionadas.
-     * Verifica que la ciudad principal no esté en la selección.
-     */
-    private fun mostrarDialogoEliminarMultiple() {
-        val idCiudadPrincipal = DatosCompartidos.idCiudadSeleccionada
-
-        val idsAEliminar = adaptadorLocalizacion.obtenerCiudadesSeleccionadas()
-        
-        // Verificar si se intenta eliminar la ciudad principal
-        if (idsAEliminar.contains(idCiudadPrincipal)) {
-            Toast.makeText(this, R.string.ubicaciones_no_eliminar_principal_deseleccionar, Toast.LENGTH_LONG).show()
-            return
+    // Diálogo añadir ciudad
+    if (mostrarDialogoAnadir) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoAnadir = false },
+            title = { Text(stringResource(R.string.ubicaciones_seleccionar_titulo)) },
+            text = {
+                LazyColumn {
+                    items(todasLasCiudadesDB) { ciudadConTiempo ->
+                        val estaOculta = ciudadesOcultas.contains(ciudadConTiempo.ciudad.idCiudad)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    if (estaOculta) {
+                                        ciudadAAnadir = ciudadConTiempo.ciudad
+                                        mostrarDialogoConfirmarAnadir = true
+                                        mostrarDialogoAnadir = false
+                                    }
+                                }
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(ciudadConTiempo.ciudad.nombre)
+                            if (!estaOculta) {
+                                Text("✓", color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoAnadir = false }) {
+                    Text(stringResource(R.string.btn_cancelar))
+                }
+            }
+        )
+    }
+    
+    // Diálogo confirmar añadir
+    if (mostrarDialogoConfirmarAnadir && ciudadAAnadir != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoConfirmarAnadir = false },
+            title = { Text(stringResource(R.string.ubicaciones_anadir_titulo)) },
+            text = { Text(stringResource(R.string.ubicaciones_anadir_mensaje, ciudadAAnadir!!.nombre)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    alMostrarCiudad(ciudadAAnadir!!.idCiudad)
+                    mostrarDialogoConfirmarAnadir = false
+                }) {
+                    Text(stringResource(R.string.ubicaciones_anadir_btn))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoConfirmarAnadir = false }) {
+                    Text(stringResource(R.string.btn_cancelar))
+                }
+            }
+        )
+    }
+    
+    // Diálogo eliminar
+    if (mostrarDialogoEliminar) {
+        val cantidadAEliminar = if (modoEliminacion && ciudadesSeleccionadas.isNotEmpty()) {
+            ciudadesSeleccionadas.size
+        } else {
+            1
         }
         
-        val cantidad = idsAEliminar.size
-        AlertDialog.Builder(this)
-            .setTitle(R.string.ubicaciones_dialogo_eliminar_titulo)
-            .setMessage(getString(R.string.ubicaciones_eliminar_multiple_mensaje, cantidad))
-            .setPositiveButton(R.string.ubicaciones_eliminar) { _, _ ->
-                idsAEliminar.forEach { id ->
-                    ocultarCiudad(id)
+        AlertDialog(
+            onDismissRequest = { 
+                mostrarDialogoEliminar = false
+                ciudadAEliminar = null
+            },
+            title = { Text(stringResource(R.string.ubicaciones_dialogo_eliminar_titulo)) },
+            text = {
+                if (modoEliminacion && ciudadesSeleccionadas.isNotEmpty()) {
+                    Text(stringResource(R.string.ubicaciones_eliminar_multiple_mensaje, cantidadAEliminar))
+                } else {
+                    Text("${stringResource(R.string.ubicaciones_dialogo_eliminar_mensaje)} ${ciudadAEliminar?.nombre}?")
                 }
-                Toast.makeText(this, getString(R.string.ubicaciones_multiples_eliminadas, cantidad), Toast.LENGTH_SHORT).show()
-                configurarBotonCancelar()
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (modoEliminacion && ciudadesSeleccionadas.isNotEmpty()) {
+                        if (ciudadesSeleccionadas.contains(idCiudadPrincipal)) {
+                            alMostrarMensaje("No puedes eliminar la ciudad principal")
+                        } else {
+                            ciudadesSeleccionadas.forEach { id ->
+                                alOcultarCiudad(id)
+                            }
+                        }
+                        ciudadesSeleccionadas = emptySet()
+                        modoEliminacion = false
+                    } else {
+                        ciudadAEliminar?.let { ciudad ->
+                            if (ciudad.idCiudad == idCiudadPrincipal) {
+                                alMostrarMensaje("No puedes eliminar la ciudad principal")
+                            } else {
+                                alOcultarCiudad(ciudad.idCiudad)
+                            }
+                        }
+                    }
+                    mostrarDialogoEliminar = false
+                    ciudadAEliminar = null
+                }) {
+                    Text(stringResource(R.string.ubicaciones_eliminar))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    mostrarDialogoEliminar = false
+                    ciudadAEliminar = null
+                }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
             }
-            .setNegativeButton(android.R.string.cancel) { _, _ ->
-                configurarBotonCancelar()
+        )
+    }
+}
+
+@Composable
+fun ElementoLocalizacion(
+    ciudadConTiempo: CiudadConTiempoActual,
+    esCiudadPrincipal: Boolean,
+    usarFahrenheit: Boolean,
+    modoEliminacion: Boolean,
+    estaSeleccionada: Boolean,
+    alCambiarSeleccion: (Boolean) -> Unit,
+    alPulsar: () -> Unit,
+    alEliminar: () -> Unit
+) {
+    val ciudad = ciudadConTiempo.ciudad
+    val tiempo = ciudadConTiempo.tiempoActual
+    val contexto = LocalContext.current
+    
+    val formatoDia = SimpleDateFormat("EEEE", Locale.getDefault())
+    val diaSemana = formatoDia.format(Date()).replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { alPulsar() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (modoEliminacion) {
+                Checkbox(
+                    checked = estaSeleccionada,
+                    onCheckedChange = alCambiarSeleccion
+                )
+                Spacer(modifier = Modifier.width(8.dp))
             }
-            .show()
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = ciudad.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = diaSemana,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                tiempo?.let {
+                    Text(
+                        text = DatosCompartidos.traducirDescripcion(contexto, it.descripcion),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (esCiudadPrincipal) {
+                        val tempMin = if (usarFahrenheit) (it.tempBaja * 9/5) + 32 else it.tempBaja
+                        val tempMax = if (usarFahrenheit) (it.tempAlta * 9/5) + 32 else it.tempAlta
+                        Text(
+                            text = "MIN: ${tempMin.toInt()}° / MAX: ${tempMax.toInt()}°",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            
+            tiempo?.let {
+                val temp = if (usarFahrenheit) (it.temperatura * 9/5) + 32 else it.temperatura
+                Text(
+                    text = "${temp.toInt()}°",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            if (esCiudadPrincipal) {
+                Icon(
+                    painterResource(R.drawable.ic_home),
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                tiempo?.let {
+                    val iconoRes = when(it.codigoIcono) {
+                        "ic_sol" -> R.drawable.ic_sol
+                        "ic_lluvia" -> R.drawable.ic_lluvia
+                        "ic_nieve" -> R.drawable.ic_nieve
+                        "ic_nublado" -> R.drawable.ic_nublado
+                        "ic_parcialmente_nublado" -> R.drawable.ic_parcialmente_nublado
+                        "ic_tormenta" -> R.drawable.ic_tormenta
+                        else -> R.drawable.ic_sol
+                    }
+                    Icon(
+                        painterResource(iconoRes),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
     }
 }
